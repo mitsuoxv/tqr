@@ -3,15 +3,12 @@ Type: Package
 Title: Add tq_xx functions to tidyquant package to facilitate economic analyses
 Version: 0.0.0.9000
 Author: Mitsuo Shiota
-Maintainer: Mitsuo Shiota <mitsuo.shiota.xv@hitachi.com>
-Description: Utility functions to facilitate economic analyses on
-    time series data in tidy dataframe, which is advocated by tidyquant
-    package, and is consisted of three columns named date, symbol and price.
-    Functions are: 
-    create tidy dataframe (tq_tidy), insert missing rows (tq_pad), 
-    calculate differences (tq_diff), moving averages (tq_ma), 
-    growth rates (tq_gr) and seasonally adjusted (tq_sa), and 
-    convert to lower frequency (tq_to_freq).
+Maintainer: Mitsuo Shiota <mitsuoxv@gmail.com>
+Description: Add utility functions to facilitate economic analyses on
+    time series data to tsibble and tidyquant packages.
+    Added functions are to calculate differences (tq_diff), 
+    moving averages (tq_ma), growth rates (tq_gr) and 
+    seasonally adjusted values (tq_sa).
 Depends: R (>= 3.5.3)
 License: MIT
 Encoding: UTF-8
