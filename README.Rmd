@@ -1,0 +1,416 @@
+---
+title: "Introduction to tqr package"
+author: "Mitsuo Shiota"
+date: "2019-07-19"
+output: 
+  github_document:
+    toc: TRUE
+editor_options: 
+  chunk_output_type: console
+  
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+Updated: `r Sys.Date()`
+
+# tqr: add-on to tsibble, inspired by tidyquant
+
+When I utilize [`tidyquant` package](https://cran.r-project.org/web/packages/tidyquant/readme/README.html) for economic analyses, I often find myself writing similar functions repeatedly. I also find the idea of time aware dataframe of [`tsibble` package](https://cran.r-project.org/web/packages/tsibble/index.html) may help me deal with time series data more confidently. So I have decided to build this package to facilitate my work.
+
+`tqr` package adds functions:
+
+1. tq_diff: calculate differences
+1. tq_ma: calculate moving averages
+1. tq_gr: calculate growth rates
+1. tq_sa: calculate seasonally adjusted values
+1. cal_factory: function factory for calculation
+1. cal_factory_zoo: function factory for calculation utilizing zoo package
+1. cal_factory_ts: function factory for calculation utilizing ts class
+1. cal_factory_xts: function factory for calculation utilizing xts package
+
+
+## Installation
+
+This package is only for my own use for now. "You" means "future me".
+
+You can install the development version with:
+
+``` r
+remotes::install_github("mitsuoxv/tqr")
+
+```
+
+## Libraries
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(tsibble)
+library(tqr)
+
+```
+## Create time aware dataframe of tsibble class
+
+I use monthly effective exchange rate indices of 60 countries, which BIS publishes on [its site](https://www.bis.org/statistics/eer.htm). `symbol` column is "reer" (real effective exchange rate), "neer" (nominal effective exchange rate) or "deflator", which I calculated as "neer" / "reer" * 100. I prepared `eer` as a tibble.
+
+```{r read_eer}
+eer
+
+class(eer)
+
+```
+
+I transform `eer` from a tibble to a tsibble (`tbl_ts` class) by making clear that `date` is monthly, and by specifying `key` (category of values) and `index` (time pointing column). Once transformed, I can see meta info of a tsibble, like interval.
+
+```{r as_tsibble}
+eer_ts <- eer %>% 
+  mutate(date = yearmonth(date)) %>% 
+  as_tsibble(key = symbol, index = date)
+
+class(eer_ts)
+
+interval(eer_ts)
+
+is_regular(eer_ts)
+
+is_ordered(eer_ts)
+
+```
+
+## Insert missing rows, if necessary
+
+Sometimes data miss some rows. For example, `corrupt_data` lacks "1994 3" and some other rows. This is dangerous, as my functions often use `lag`.
+
+You can check if there are missing rows, and fill missing rows. Please refer to [`tsibble` package vignette "Handle implicit missingness with tsibble"](https://cran.r-project.org/web/packages/tsibble/vignettes/implicit-na.html).
+
+In this case, `eer_ts` does not miss any rows. I can safely apply my functions.
+
+```{r has_gaps}
+has_gaps(eer_ts)
+
+corrupt_data <- eer_ts[c(-3, -256, -900), ]
+
+has_gaps(corrupt_data)
+
+filled_data <- fill_gaps(corrupt_data)
+
+filled_data
+
+has_gaps(filled_data)
+
+
+```
+
+## tq_diff: calculate differences
+
+Let us see the differences year-over-year.
+
+```{r tq_diff, fig.width=8, fig.height=4}
+eer_ts %>% 
+  tq_diff(n = 12) %>% 
+  gather(key = "area", value = "value", -date, -symbol) %>% 
+  filter(symbol == "reer") %>% 
+  filter(area %in% c("Japan", "Euro area", "United States")) %>% 
+  ggplot(aes(x = date, y = value, color = area)) +
+  geom_hline(yintercept = 0, size = 2, color = "white") +
+  geom_line() +
+  labs(
+    title = "REER, differences year-over-year",
+    x = "", y = "", color = ""
+  )
+
+```
+
+## tq_ma: calculate moving averages
+
+Let us see 6 month moving average movements.
+
+```{r tq_ma, fig.width=8, fig.height=4}
+eer_ts %>% 
+  tq_ma(n = 6) %>% 
+  gather(key = "area", value = "value", -date, -symbol) %>% 
+  filter(symbol == "reer") %>% 
+  filter(area %in% c("Japan", "Euro area", "United States")) %>% 
+  ggplot(aes(x = date, y = value, color = area)) +
+  geom_hline(yintercept = 100, size = 2, color = "white") +
+  geom_line() +
+  labs(
+    title = "REER, 6 month moving averages",
+    x = "", y = "", color = ""
+  )
+
+```
+
+## tq_gr: calculate growth rates
+
+Let us see year-over-year growth rates, percents.
+
+```{r tq_gr, fig.width=8, fig.height=4}
+eer_ts %>% 
+  tq_gr(n = 12) %>% 
+  gather(key = "area", value = "value", -date, -symbol) %>% 
+  filter(symbol == "reer") %>% 
+  filter(area %in% c("Japan", "Euro area", "United States")) %>% 
+  ggplot(aes(x = date, y = value, color = area)) +
+  geom_hline(yintercept = 0, size = 2, color = "white") +
+  geom_line() +
+  labs(
+    title = "REER, year-over-year growth rates",
+    x = "", y = "", color = ""
+  )
+
+```
+
+## Convert to lower frequency
+
+You can convert from "month" to "quarter".
+
+```{r convert_freq, fig.width=8, fig.height=4}
+eer_q <- eer_ts %>% 
+  gather(key = "area", value = "value", -date, -symbol) %>% 
+  group_by(symbol, area) %>% 
+  index_by(quarter = yearquarter(date)) %>% 
+  summarize(value = mean(value))
+
+eer_q %>% 
+  filter(symbol == "reer") %>% 
+  filter(area %in% c("Japan", "Euro area", "United States")) %>% 
+  ggplot(aes(x = quarter, y = value, color = area)) +
+  geom_hline(yintercept = 100, size = 2, color = "white") +
+  geom_line() +
+  labs(
+    title = "REER, quarters",
+    x = "", y = "", color = ""
+  )
+
+```
+
+## tq_sa: calculate seasonally adjusted values
+
+Greece has seasonality in deflator which is nominal divided by real effective exchange rate.
+
+Let us get seasonally adjust values. `tq_sa` utilizes [`seasonal` package](https://www.rdocumentation.org/packages/seasonal/versions/1.7.0).
+
+```{r tq_sa, fig.width=8, fig.height=4}
+greece <- eer_ts %>% 
+  gather(key = "area", value = "value", -date, -symbol) %>% 
+  filter(symbol == "deflator", area == "Greece") %>% 
+  mutate(symbol = "original")
+
+greece_sa <- greece %>% 
+  tq_sa() %>% 
+  mutate(symbol = "seasonally adjusted")
+
+greece %>% 
+  bind_rows(greece_sa) %>% 
+  ggplot(aes(x = date, y = value, color = symbol)) +
+  geom_hline(yintercept = 100, size = 2, color = "white") +
+  geom_line() +
+  labs(
+    title = "Deflator, Greece",
+    x = "", y = "", color = ""
+  )
+
+```
+
+## cal_factory: function factory for calculation
+
+`tq_diff`, `tq_ma` and `tq_gr` functions are manufactured by `cal_factory` function. You can manufacture your own function. For example, here I manufacture a function to pick up every 6 month values.
+
+```{r cal_factory, fig.width=8, fig.height=4}
+tq_by6 <- cal_factory(
+  function(num) {
+    num[seq(1, length(num), by = 6)]
+  },
+  function(idx) {
+    idx[seq(1, length(idx), by = 6)]
+  },
+  function(itv) {
+    interval <- itv2list(itv)
+    
+    interval$number <- interval$number * 6
+
+    paste0(interval$number, interval$category)
+  }
+)
+
+greece %>% 
+  tq_by6() %>% 
+  ggplot(aes(x = date, y = value, color = symbol)) +
+  geom_hline(yintercept = 100, size = 2, color = "white") +
+  geom_line() +
+  labs(
+    title = "Deflator, every 6 month, Greece",
+    x = "", y = "", color = ""
+  )
+
+```
+
+If you don't mind dirts and are willing to clean up later, you can manufacture a function that makes "date" column non dates. For example, I manufacture a function to calculate range.
+
+```{r dirty_example1}
+tq_range <- cal_factory(
+  function(num) {
+    range(num)
+  },
+  function(idx) {
+    c("min", "max")
+  },
+  function(itv) {
+    "?"
+  }
+)
+
+eer_ts %>% 
+  tq_range()
+
+eer_ts %>% 
+  tq_range() %>% 
+  gather(key = "area", value = "value", -date, -symbol) %>% 
+  spread(key = date, value = value) %>% 
+  mutate(range = max - min) %>% 
+  filter(symbol == "deflator") %>% 
+  arrange(desc(range))
+
+```
+
+Another dirty example. I calculate deflators' rates of change from the prior month, look at auto correlation of Algeria, and find high correlation every 12 months, i.e. seasonality. Then, I manufacture `tq_acf` function to get auto correlation values, and find that Greece has the highest seasonality.
+
+```{r dirty_example2, fig.width=8, fig.height=4}
+defl_gr1 <- eer_ts %>% 
+  filter(symbol == "deflator") %>% 
+  tq_gr(n = 1) %>% 
+  filter(!is.na(Algeria))
+
+acf(defl_gr1$Algeria, lag.max = 24)
+
+tq_acf <- cal_factory(
+  function(num) {
+    acf(num, lag.max = 24, plot = FALSE)$acf
+  },
+  function(idx) {
+    paste0("acf", 0:24)
+  },
+  function(itv) {
+    "?"
+  }
+)
+
+defl_gr1 %>% 
+  tq_acf() %>% 
+  filter(date == "acf12") %>% 
+  gather(key = "area", value = "value", -c(date, symbol)) %>% 
+  arrange(desc(value))
+
+
+```
+
+## cal_factory_zoo: function factory for calculation utilizing zoo package
+
+You can utilize functions in zoo package in `cal_factory_zoo`. Here, for example, I utilize `zoo::rollmean`, and manufacture `tq_rollmean`, which has the same functionality of `tq_ma`. Although the output is not exactly the same due to floating point calculations, you can consider it as the same with `near` tolerance.
+
+```{r cal_factory_zoo}
+tq_rollmean <- cal_factory_zoo(
+  function(num, ...) {
+    zoo::rollmean(num, ...)
+  },
+  function(idx) idx,
+  function(itv) itv
+)
+
+all_equal(
+   tq_rollmean(eer_ts, k = 3, align = "right", fill = NA),
+   tq_ma(eer_ts, n = 3)
+)
+
+all_equal(
+   tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)[, "date"],
+   tq_ma(eer_ts, n = 3)[, "date"]
+)
+
+all_equal(
+   tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)[, "Algeria"],
+   tq_ma(eer_ts, n = 3)[, "Algeria"]
+)
+
+near(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)$Algeria,
+     tq_ma(eer_ts, n = 3)$Algeria) %>%
+  all(na.rm = TRUE)
+
+
+```
+
+Speed is comparable. If you need speed, don't mind which function to choose, instead consider to spread to wide format.
+
+```{r speed}
+system.time(tq_ma(eer_ts, n = 3))
+system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
+
+eer_ts_long <- eer_ts %>% 
+  gather(key = "area", value = "value", -date, -symbol)
+
+system.time(tq_ma(eer_ts_long, n = 3))
+system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))
+
+
+```
+
+## cal_factory_ts: function factory for calculation utilizing ts class
+
+`tq_sa` is manufactured by `cal_factory_ts` function. This function factory is only for interval "1Q" (quarterly) or "1M" (monthly). `tq_sa` is the only example for now.
+
+```{r cal_factory_ts}
+tq_sa <- cal_factory_ts(
+  function(num_ts, ...) {
+    num_ts %>%
+      seasonal::seas(...) %>%
+      seasonal::final() %>%
+      as.numeric()
+  },
+  function(idx) {
+    idx
+  },
+  function(itv) {
+    itv
+  }
+)
+
+
+```
+
+## cal_factory_xts: function factory for calculation utilizing xts package
+
+`xts::to.period` function can convert to OHLC (Open, High, Low, Close) in lower frequency. If OHLC = TRUE (default), one column expands to four, so you must input long format with only one numeric column. If you set OHLC = FALSE, you can input wide format, and get C (Close).
+
+```{r cal_factory_xts}
+tq_to_quarters <- cal_factory_xts(
+  function(num, ...) {
+    xts::to.period(num, period = "quarters", indexAt = "last", ...)
+  },
+  function(idx) {
+    idx
+  },
+  function(itv) {
+    "1Q"
+  }
+)
+
+eer_ts %>% 
+  select(date, symbol, Algeria) %>% 
+  tq_to_quarters()
+
+eer_ts %>% 
+  tq_to_quarters(OHLC = FALSE)
+
+
+```
+
+EOL
