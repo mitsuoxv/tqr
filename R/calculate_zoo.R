@@ -30,7 +30,7 @@ cal_factory_zoo <-
 
       interval_input <- df_ts %>%
         tsibble::interval() %>%
-        capture.output()
+        utils::capture.output()
 
       df <- tibble::as_tibble(df_ts)
 
@@ -59,7 +59,7 @@ cal_factory_zoo <-
 
       calculated <- df %>%
         dplyr::group_by(!!!key_v) %>%
-        tidyr::nest() %>%
+        tidyr::nest(.key = "data") %>%
         dplyr::mutate(data = purrr::map(data, mutate_fun)) %>%
         tidyr::unnest(data) %>%
         dplyr::ungroup()

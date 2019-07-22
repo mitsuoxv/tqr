@@ -30,7 +30,7 @@ cal_factory_ts <-
 
       interval_input <- df_ts %>%
         tsibble::interval() %>%
-        capture.output()
+        utils::capture.output()
 
       # sanity check
       if (!(interval_input %in% c("1Q", "1M"))) {
@@ -65,7 +65,7 @@ cal_factory_ts <-
           dplyr::select(-!!index_v)
 
         mts_mat <- df_value_only %>%
-          ts(start = start, frequency = freq)
+          stats::ts(start = start, frequency = freq)
 
         if (is.null(dim(mts_mat))) {
           # ts class
@@ -91,7 +91,7 @@ cal_factory_ts <-
 
       calculated <- df %>%
         dplyr::group_by(!!!key_v) %>%
-        tidyr::nest() %>%
+        tidyr::nest(.key = "data") %>%
         dplyr::mutate(data = purrr::map(data, mutate_fun)) %>%
         tidyr::unnest(data) %>%
         dplyr::ungroup()
