@@ -7,11 +7,9 @@
 tq_gr(df_ts, ...)
 }
 \arguments{
-\item{df}{A tbl_ts object.}
+\item{df_ts}{A tbl_ts object.}
 
-\item{n}{Degree of lag for growth.}
-
-\item{annualize}{A numeric value of annual frequency.}
+\item{...}{Parameters for fun_num.}
 }
 \value{
 A tbl_ts object.

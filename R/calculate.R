@@ -3,7 +3,6 @@
 #' @param fun_num A function to transform a numeric vector.
 #' @param fun_idx A function to transform a numeric vector representing time.
 #' @param fun_itv A function to transform a string representing interval.
-#' @param df_ts A tbl_ts object.
 #' @param ... Arguments for fun_num.
 #' @return A function to transform a tsibble into a tsibble or a tibble.
 #' @examples
@@ -74,8 +73,8 @@ cal_factory <-
 
 #' Calculate differences.
 #'
-#' @param df A tbl_ts object.
-#' @param n Degree of lag for difference.
+#' @param df_ts A tbl_ts object.
+#' @param ... Parameters for fun_num.
 #' @return A tbl_ts object.
 #' @examples
 #' \dontrun{
@@ -98,11 +97,8 @@ tq_diff <- cal_factory(
 
 #' Calculate moving averages.
 #'
-#' @param df A tbl_ts object.
-#' @param n Span of moving average. .size for slide_dbl function.
-#' @param na.rm An argument for mean function.
-#' @param .align An argument for slide_dbl function.
-#' @param ... Arguments for slide_dbl function.
+#' @param df_ts A tbl_ts object.
+#' @param ... Parameters for fun_num.
 #' @return A tbl_ts object.
 #' @examples
 #' \dontrun{
@@ -125,9 +121,8 @@ tq_ma <- cal_factory(
 
 #' Calculate growth rates.
 #'
-#' @param df A tbl_ts object.
-#' @param n Degree of lag for growth.
-#' @param annualize A numeric value of annual frequency.
+#' @param df_ts A tbl_ts object.
+#' @param ... Parameters for fun_num.
 #' @return A tbl_ts object.
 #' @examples
 #' \dontrun{

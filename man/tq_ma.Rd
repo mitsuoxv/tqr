@@ -7,15 +7,9 @@
 tq_ma(df_ts, ...)
 }
 \arguments{
-\item{...}{Arguments for slide_dbl function.}
+\item{df_ts}{A tbl_ts object.}
 
-\item{df}{A tbl_ts object.}
-
-\item{n}{Span of moving average. .size for slide_dbl function.}
-
-\item{na.rm}{An argument for mean function.}
-
-\item{.align}{An argument for slide_dbl function.}
+\item{...}{Parameters for fun_num.}
 }
 \value{
 A tbl_ts object.

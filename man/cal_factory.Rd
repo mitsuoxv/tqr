@@ -13,8 +13,6 @@ cal_factory(fun_num, fun_idx, fun_itv)
 
 \item{fun_itv}{A function to transform a string representing interval.}
 
-\item{df_ts}{A tbl_ts object.}
-
 \item{...}{Arguments for fun_num.}
 }
 \value{

@@ -3,7 +3,6 @@
 #' @param fun_num A function to transform a numeric vector or matrix of zoo class.
 #' @param fun_idx A function to transform a numeric vector representing time.
 #' @param fun_itv A function to transform a string representing interval.
-#' @param df_ts A tbl_ts object.
 #' @param ... Arguments for fun_num.
 #' @return A function to transform a tsibble into a tsibble or a tibble.
 #' @examples

@@ -3,7 +3,6 @@
 #' @param fun_num A function to transform a numeric vector.
 #' @param fun_idx A function to transform a numeric vector representing time.
 #' @param fun_itv A function to transform a string representing interval.
-#' @param df_ts A tbl_ts object.
 #' @param ... Arguments for fun_num.
 #' @return A function to transform a tsibble into a tsibble or a tibble.
 #' @examples
@@ -115,11 +114,13 @@ cal_factory_ts <-
 
 #' Calculate seasonally adjusted values.
 #'
-#' @param df A tbl_ts object.
+#' @param df_ts A tbl_ts object.
 #' @param ... Parameters of seasonal::seas().
 #' @return A tbl_ts object.
 #' @examples
+#' \dontrun{
 #' tq_sa(df)
+#' }
 #' @export
 tq_sa <- cal_factory_ts(
   function(num_ts, ...) {

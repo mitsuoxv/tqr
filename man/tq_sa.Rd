@@ -7,9 +7,9 @@
 tq_sa(df_ts, ...)
 }
 \arguments{
-\item{...}{Parameters of seasonal::seas().}
+\item{df_ts}{A tbl_ts object.}
 
-\item{df}{A tbl_ts object.}
+\item{...}{Parameters of seasonal::seas().}
 }
 \value{
 A tbl_ts object.
@@ -18,5 +18,7 @@ A tbl_ts object.
 Calculate seasonally adjusted values.
 }
 \examples{
+\dontrun{
 tq_sa(df)
+}
 }

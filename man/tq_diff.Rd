@@ -7,9 +7,9 @@
 tq_diff(df_ts, ...)
 }
 \arguments{
-\item{df}{A tbl_ts object.}
+\item{df_ts}{A tbl_ts object.}
 
-\item{n}{Degree of lag for difference.}
+\item{...}{Parameters for fun_num.}
 }
 \value{
 A tbl_ts object.
