@@ -12,6 +12,10 @@ editor_options:
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+<!-- badges: start -->
+  [![Travis build status](https://travis-ci.org/mitsuoxv/tqr.svg?branch=master)](https://travis-ci.org/mitsuoxv/tqr)
+<!-- badges: end -->
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,

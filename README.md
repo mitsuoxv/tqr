@@ -32,7 +32,13 @@ Mitsuo Shiota
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-Updated: 2019-07-19
+<!-- badges: start -->
+
+[![Travis build
+status](https://travis-ci.org/mitsuoxv/tqr.svg?branch=master)](https://travis-ci.org/mitsuoxv/tqr)
+<!-- badges: end -->
+
+Updated: 2019-07-23
 
 # tqr: add-on to tsibble, inspired by tidyquant
 
@@ -513,7 +519,7 @@ all_equal(
    tq_rollmean(eer_ts, k = 3, align = "right", fill = NA),
    tq_ma(eer_ts, n = 3)
 )
-#> [1] "Rows in x but not y: 767, 221, 513, 568, 520, 131, 450, 534, 521, 94, 371[...]. Rows in y but not x: 325, 320, 81, 678, 328, 674, 163, 292, 264, 690, 902[...]. "
+#> [1] "Rows in x but not y: 317, 809, 799, 98, 253, 379, 279, 3, 327, 835, 41[...]. Rows in y but not x: 150, 310, 665, 470, 172, 516, 339, 878, 617, 267, 237[...]. "
 
 all_equal(
    tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)[, "date"],
@@ -539,20 +545,20 @@ choose, instead consider to spread to wide format.
 ``` r
 system.time(tq_ma(eer_ts, n = 3))
 #>    user  system elapsed 
-#>    0.38    0.00    0.37
+#>    0.36    0.00    0.36
 system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>    0.54    0.00    0.56
+#>    0.55    0.00    0.54
 
 eer_ts_long <- eer_ts %>% 
   gather(key = "area", value = "value", -date, -symbol)
 
 system.time(tq_ma(eer_ts_long, n = 3))
 #>    user  system elapsed 
-#>    6.29    1.28    7.59
+#>    6.68    3.50   10.23
 system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>    7.13    1.48    8.62
+#>    7.19    3.90   11.11
 ```
 
 ## cal\_factory\_ts: function factory for calculation utilizing ts class
