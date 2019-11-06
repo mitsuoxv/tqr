@@ -59,7 +59,7 @@ cal_factory_zoo <-
 
       calculated <- df %>%
         dplyr::group_by(!!!key_v) %>%
-        tidyr::nest(.key = "data") %>%
+        tidyr::nest() %>%
         dplyr::mutate(data = purrr::map(data, mutate_fun)) %>%
         tidyr::unnest(data) %>%
         dplyr::ungroup()
