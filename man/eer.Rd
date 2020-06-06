@@ -4,12 +4,14 @@
 \name{eer}
 \alias{eer}
 \title{Effective exchange rates.}
-\format{Data frame with columns
+\format{
+Data frame with columns
 \describe{
 \item{date}{months}
 \item{symbol}{"reer" (real), "neer" (nominal) or "deflator"}
 \item{Algeria}{areas}
-}}
+}
+}
 \source{
 https://www.bis.org/statistics/eer.htm
 }

@@ -38,7 +38,7 @@ Mitsuo Shiota
 status](https://travis-ci.org/mitsuoxv/tqr.svg?branch=master)](https://travis-ci.org/mitsuoxv/tqr)
 <!-- badges: end -->
 
-Updated: 2020-06-06
+Updated: 2020-06-07
 
 # tqr: add-on to tsibble, inspired by tidyquant
 
@@ -71,7 +71,7 @@ This package is only for my own use for now. “You” means “future me”.
 You can install the development version with:
 
 ``` r
-remotes::install_github("mitsuoxv/tqr")
+# remotes::install_github("mitsuoxv/tqr")
 ```
 
 ## Libraries
@@ -499,17 +499,17 @@ system.time(tq_ma(eer_ts, n = 3))
 #>   0.404   0.000   0.404
 system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   0.504   0.000   0.504
+#>   0.499   0.000   0.500
 
 eer_ts_long <- eer_ts %>% 
   gather(key = "area", value = "value", -date, -symbol)
 
 system.time(tq_ma(eer_ts_long, n = 3))
 #>    user  system elapsed 
-#>    1.11    0.00    1.11
+#>   1.106   0.000   1.107
 system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   1.539   0.000   1.540
+#>   1.527   0.000   1.527
 ```
 
 ## cal\_factory\_ts: function factory for calculation utilizing ts class
