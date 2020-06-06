@@ -21,6 +21,7 @@ Imports:
     seasonal,
     magrittr,
     tsibble,
+    slider,
     tibble,
     zoo,
     xts,

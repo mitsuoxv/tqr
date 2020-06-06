@@ -24,6 +24,7 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
+
 Updated: `r Sys.Date()`
 
 # tqr: add-on to tsibble, inspired by tidyquant
@@ -294,8 +295,6 @@ defl_gr1 <- eer_ts %>%
   tq_gr(n = 1) %>% 
   filter(!is.na(Algeria))
 
-acf(defl_gr1$Algeria, lag.max = 24)
-
 tq_acf <- cal_factory(
   function(num) {
     acf(num, lag.max = 24, plot = FALSE)$acf
@@ -331,18 +330,8 @@ tq_rollmean <- cal_factory_zoo(
 )
 
 all_equal(
-   tq_rollmean(eer_ts, k = 3, align = "right", fill = NA),
-   tq_ma(eer_ts, n = 3)
-)
-
-all_equal(
    tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)[, "date"],
    tq_ma(eer_ts, n = 3)[, "date"]
-)
-
-all_equal(
-   tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)[, "Algeria"],
-   tq_ma(eer_ts, n = 3)[, "Algeria"]
 )
 
 near(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)$Algeria,

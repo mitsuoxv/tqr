@@ -30,7 +30,7 @@ cal_factory_zoo <-
 
       interval_input <- df_ts %>%
         tsibble::interval() %>%
-        utils::capture.output()
+        tsibble:::format.interval()
 
       df <- tibble::as_tibble(df_ts)
 

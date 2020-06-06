@@ -30,7 +30,7 @@ cal_factory <-
 
       interval_input <- df_ts %>%
         tsibble::interval() %>%
-        utils::capture.output()
+        tsibble:::format.interval()
 
       df <- tibble::as_tibble(df_ts)
 
@@ -42,7 +42,8 @@ cal_factory <-
       mutate_fun <- function(df) {
         df_value <- df %>%
           dplyr::select(-!!index_v) %>%
-          purrr::map(fun_num, ...)
+          purrr::map(fun_num, ...) %>%
+          tibble::as_tibble()
 
         tibble::tibble(!!index_v := fun_idx(df[[index_variable]])) %>%
           dplyr::bind_cols(df_value)
@@ -108,7 +109,7 @@ tq_diff <- cal_factory(
 #' @export
 tq_ma <- cal_factory(
   function(num, n = 3, na.rm = FALSE, .align = "right", ...) {
-    tsibble::slide_dbl(num, mean, na.rm = na.rm, .size = n, .align = .align, ...)
+    slider::slide_dbl(num, mean, na.rm = na.rm, .size = n, .align = .align, ...)
   },
   function(idx) {
     idx

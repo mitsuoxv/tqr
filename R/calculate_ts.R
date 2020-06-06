@@ -30,7 +30,7 @@ cal_factory_ts <-
 
       interval_input <- df_ts %>%
         tsibble::interval() %>%
-        utils::capture.output()
+        tsibble:::format.interval()
 
       # sanity check
       if (!(interval_input %in% c("1Q", "1M"))) {
@@ -83,6 +83,8 @@ cal_factory_ts <-
             df_value[[col]] <- mts_mat[, col] %>% fun_num()
           }
         }
+
+        df_value <- as_tibble(df_value)
 
         tibble::tibble(!!index_v := fun_idx(df[[index_variable]])) %>%
           dplyr::bind_cols(df_value)
