@@ -71,7 +71,7 @@ This package is only for my own use for now. “You” means “future me”.
 You can install the development version with:
 
 ``` r
-# remotes::install_github("mitsuoxv/tqr")
+remotes::install_github("mitsuoxv/tqr")
 ```
 
 ## Libraries
@@ -496,20 +496,20 @@ choose, instead consider to spread to wide format.
 ``` r
 system.time(tq_ma(eer_ts, n = 3))
 #>    user  system elapsed 
-#>   0.404   0.000   0.404
+#>   0.401   0.000   0.402
 system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   0.499   0.000   0.500
+#>   0.498   0.000   0.499
 
 eer_ts_long <- eer_ts %>% 
   gather(key = "area", value = "value", -date, -symbol)
 
 system.time(tq_ma(eer_ts_long, n = 3))
 #>    user  system elapsed 
-#>   1.106   0.000   1.107
+#>   1.101   0.004   1.106
 system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   1.527   0.000   1.527
+#>   1.522   0.004   1.527
 ```
 
 ## cal\_factory\_ts: function factory for calculation utilizing ts class
