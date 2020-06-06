@@ -7,7 +7,7 @@ library(tidyverse)
 # which BIS publishes on https://www.bis.org/statistics/eer.htm.
 
 httr::GET("https://www.bis.org/statistics/eer/broad.xlsx",
-          httr::write_disk("data-raw/broad.xlsx"))
+          httr::write_disk("data-raw/broad.xlsx", overwrite = TRUE))
 
 broad <- "data-raw/broad.xlsx"
 
@@ -35,5 +35,5 @@ eer <- eer %>%
 
 eer$date <- as.Date(eer$date)
 
-usethis::use_data(eer)
+usethis::use_data(eer, overwrite = TRUE)
 
