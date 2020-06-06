@@ -38,7 +38,7 @@ Mitsuo Shiota
 status](https://travis-ci.org/mitsuoxv/tqr.svg?branch=master)](https://travis-ci.org/mitsuoxv/tqr)
 <!-- badges: end -->
 
-Updated: 2019-07-23
+Updated: 2020-06-06
 
 # tqr: add-on to tsibble, inspired by tidyquant
 
@@ -93,33 +93,31 @@ publishes on [its site](https://www.bis.org/statistics/eer.htm).
 ``` r
 eer
 #> # A tibble: 915 x 62
-#>    date       symbol Algeria Argentina Australia Austria Belgium Brazil
-#>    <date>     <chr>    <dbl>     <dbl>     <dbl>   <dbl>   <dbl>  <dbl>
-#>  1 1994-01-31 defla~    152.      84.2      106.    84.3    88.8  1336.
-#>  2 1994-02-28 defla~    147.      91.7      107.    84.5    89.2   957.
-#>  3 1994-03-31 defla~    144.     100.       107.    84.6    89.7   673.
-#>  4 1994-04-30 defla~    142.     109.       107.    85.1    90.1   474.
-#>  5 1994-05-31 defla~    135.     119.       108.    85.4    90.3   330.
-#>  6 1994-06-30 defla~    134.     130.       108.    85.6    90.4   224.
-#>  7 1994-07-31 defla~    133.     131.       108.    84.8    90.1   211.
-#>  8 1994-08-31 defla~    129.     132.       108.    84.7    90.3   208.
-#>  9 1994-09-30 defla~    123.     132.       108.    85.6    90.8   205.
-#> 10 1994-10-31 defla~    121.     133.       108.    86.2    91.3   201.
-#> # ... with 905 more rows, and 54 more variables: Bulgaria <dbl>,
-#> #   Canada <dbl>, Chile <dbl>, China <dbl>, `Chinese Taipei` <dbl>,
-#> #   Colombia <dbl>, Croatia <dbl>, Cyprus <dbl>, `Czech Republic` <dbl>,
-#> #   Denmark <dbl>, Estonia <dbl>, `Euro area` <dbl>, Finland <dbl>,
-#> #   France <dbl>, Germany <dbl>, Greece <dbl>, `Hong Kong SAR` <dbl>,
-#> #   Hungary <dbl>, Iceland <dbl>, India <dbl>, Indonesia <dbl>,
-#> #   Ireland <dbl>, Israel <dbl>, Italy <dbl>, Japan <dbl>, Korea <dbl>,
-#> #   Latvia <dbl>, Lithuania <dbl>, Luxembourg <dbl>, Malaysia <dbl>,
-#> #   Malta <dbl>, Mexico <dbl>, Netherlands <dbl>, `New Zealand` <dbl>,
-#> #   Norway <dbl>, Peru <dbl>, Philippines <dbl>, Poland <dbl>,
+#>    date       symbol Algeria Argentina Australia Austria Belgium Brazil Bulgaria
+#>    <date>     <chr>    <dbl>     <dbl>     <dbl>   <dbl>   <dbl>  <dbl>    <dbl>
+#>  1 1994-01-31 defla…    152.      84.2      106.    84.3    88.8  1336.    6026.
+#>  2 1994-02-28 defla…    147.      91.7      107.    84.5    89.2   957.    5865.
+#>  3 1994-03-31 defla…    144.     100.       107.    84.6    89.7   673.    5521.
+#>  4 1994-04-30 defla…    142.     109.       107.    85.1    90.1   474.    4635.
+#>  5 1994-05-31 defla…    135.     119.       108.    85.4    90.3   330.    4351.
+#>  6 1994-06-30 defla…    134.     130.       108.    85.6    90.4   224.    4223.
+#>  7 1994-07-31 defla…    133.     131.       108.    84.8    90.1   211.    4219.
+#>  8 1994-08-31 defla…    129.     132.       108.    84.7    90.3   208.    4039.
+#>  9 1994-09-30 defla…    123.     132.       108.    85.6    90.8   205.    3691.
+#> 10 1994-10-31 defla…    121.     133.       108.    86.2    91.3   201.    3512.
+#> # … with 905 more rows, and 53 more variables: Canada <dbl>, Chile <dbl>,
+#> #   China <dbl>, `Chinese Taipei` <dbl>, Colombia <dbl>, Croatia <dbl>,
+#> #   Cyprus <dbl>, `Czech Republic` <dbl>, Denmark <dbl>, Estonia <dbl>, `Euro
+#> #   area` <dbl>, Finland <dbl>, France <dbl>, Germany <dbl>, Greece <dbl>,
+#> #   `Hong Kong SAR` <dbl>, Hungary <dbl>, Iceland <dbl>, India <dbl>,
+#> #   Indonesia <dbl>, Ireland <dbl>, Israel <dbl>, Italy <dbl>, Japan <dbl>,
+#> #   Korea <dbl>, Latvia <dbl>, Lithuania <dbl>, Luxembourg <dbl>,
+#> #   Malaysia <dbl>, Malta <dbl>, Mexico <dbl>, Netherlands <dbl>, `New
+#> #   Zealand` <dbl>, Norway <dbl>, Peru <dbl>, Philippines <dbl>, Poland <dbl>,
 #> #   Portugal <dbl>, Romania <dbl>, Russia <dbl>, `Saudi Arabia` <dbl>,
 #> #   Singapore <dbl>, Slovakia <dbl>, Slovenia <dbl>, `South Africa` <dbl>,
-#> #   Spain <dbl>, Sweden <dbl>, Switzerland <dbl>, Thailand <dbl>,
-#> #   Turkey <dbl>, `United Arab Emirates` <dbl>, `United Kingdom` <dbl>,
-#> #   `United States` <dbl>
+#> #   Spain <dbl>, Sweden <dbl>, Switzerland <dbl>, Thailand <dbl>, Turkey <dbl>,
+#> #   `United Arab Emirates` <dbl>, `United Kingdom` <dbl>, `United States` <dbl>
 
 class(eer)
 #> [1] "tbl_df"     "tbl"        "data.frame"
@@ -139,7 +137,8 @@ class(eer_ts)
 #> [1] "tbl_ts"     "tbl_df"     "tbl"        "data.frame"
 
 interval(eer_ts)
-#> 1M
+#> <interval[1]>
+#> [1] 1M
 
 is_regular(eer_ts)
 #> [1] TRUE
@@ -185,33 +184,31 @@ filled_data <- fill_gaps(corrupt_data)
 filled_data
 #> # A tsibble: 915 x 62 [1M]
 #> # Key:       symbol [3]
-#>          date symbol Algeria Argentina Australia Austria Belgium Brazil
-#>         <mth> <chr>    <dbl>     <dbl>     <dbl>   <dbl>   <dbl>  <dbl>
-#>  1     1994 1 defla~    152.      84.2      106.    84.3    88.8  1336.
-#>  2     1994 2 defla~    147.      91.7      107.    84.5    89.2   957.
-#>  3     1994 3 defla~     NA       NA         NA     NA      NA      NA 
-#>  4     1994 4 defla~    142.     109.       107.    85.1    90.1   474.
-#>  5     1994 5 defla~    135.     119.       108.    85.4    90.3   330.
-#>  6     1994 6 defla~    134.     130.       108.    85.6    90.4   224.
-#>  7     1994 7 defla~    133.     131.       108.    84.8    90.1   211.
-#>  8     1994 8 defla~    129.     132.       108.    84.7    90.3   208.
-#>  9     1994 9 defla~    123.     132.       108.    85.6    90.8   205.
-#> 10    1994 10 defla~    121.     133.       108.    86.2    91.3   201.
-#> # ... with 905 more rows, and 54 more variables: Bulgaria <dbl>,
-#> #   Canada <dbl>, Chile <dbl>, China <dbl>, `Chinese Taipei` <dbl>,
-#> #   Colombia <dbl>, Croatia <dbl>, Cyprus <dbl>, `Czech Republic` <dbl>,
-#> #   Denmark <dbl>, Estonia <dbl>, `Euro area` <dbl>, Finland <dbl>,
-#> #   France <dbl>, Germany <dbl>, Greece <dbl>, `Hong Kong SAR` <dbl>,
-#> #   Hungary <dbl>, Iceland <dbl>, India <dbl>, Indonesia <dbl>,
-#> #   Ireland <dbl>, Israel <dbl>, Italy <dbl>, Japan <dbl>, Korea <dbl>,
-#> #   Latvia <dbl>, Lithuania <dbl>, Luxembourg <dbl>, Malaysia <dbl>,
-#> #   Malta <dbl>, Mexico <dbl>, Netherlands <dbl>, `New Zealand` <dbl>,
-#> #   Norway <dbl>, Peru <dbl>, Philippines <dbl>, Poland <dbl>,
+#>        date symbol Algeria Argentina Australia Austria Belgium Brazil Bulgaria
+#>       <mth> <chr>    <dbl>     <dbl>     <dbl>   <dbl>   <dbl>  <dbl>    <dbl>
+#>  1 1994 Jan defla…    152.      84.2      106.    84.3    88.8  1336.    6026.
+#>  2 1994 Feb defla…    147.      91.7      107.    84.5    89.2   957.    5865.
+#>  3 1994 Mar defla…     NA       NA         NA     NA      NA      NA       NA 
+#>  4 1994 Apr defla…    142.     109.       107.    85.1    90.1   474.    4635.
+#>  5 1994 May defla…    135.     119.       108.    85.4    90.3   330.    4351.
+#>  6 1994 Jun defla…    134.     130.       108.    85.6    90.4   224.    4223.
+#>  7 1994 Jul defla…    133.     131.       108.    84.8    90.1   211.    4219.
+#>  8 1994 Aug defla…    129.     132.       108.    84.7    90.3   208.    4039.
+#>  9 1994 Sep defla…    123.     132.       108.    85.6    90.8   205.    3691.
+#> 10 1994 Oct defla…    121.     133.       108.    86.2    91.3   201.    3512.
+#> # … with 905 more rows, and 53 more variables: Canada <dbl>, Chile <dbl>,
+#> #   China <dbl>, `Chinese Taipei` <dbl>, Colombia <dbl>, Croatia <dbl>,
+#> #   Cyprus <dbl>, `Czech Republic` <dbl>, Denmark <dbl>, Estonia <dbl>, `Euro
+#> #   area` <dbl>, Finland <dbl>, France <dbl>, Germany <dbl>, Greece <dbl>,
+#> #   `Hong Kong SAR` <dbl>, Hungary <dbl>, Iceland <dbl>, India <dbl>,
+#> #   Indonesia <dbl>, Ireland <dbl>, Israel <dbl>, Italy <dbl>, Japan <dbl>,
+#> #   Korea <dbl>, Latvia <dbl>, Lithuania <dbl>, Luxembourg <dbl>,
+#> #   Malaysia <dbl>, Malta <dbl>, Mexico <dbl>, Netherlands <dbl>, `New
+#> #   Zealand` <dbl>, Norway <dbl>, Peru <dbl>, Philippines <dbl>, Poland <dbl>,
 #> #   Portugal <dbl>, Romania <dbl>, Russia <dbl>, `Saudi Arabia` <dbl>,
 #> #   Singapore <dbl>, Slovakia <dbl>, Slovenia <dbl>, `South Africa` <dbl>,
-#> #   Spain <dbl>, Sweden <dbl>, Switzerland <dbl>, Thailand <dbl>,
-#> #   Turkey <dbl>, `United Arab Emirates` <dbl>, `United Kingdom` <dbl>,
-#> #   `United States` <dbl>
+#> #   Spain <dbl>, Sweden <dbl>, Switzerland <dbl>, Thailand <dbl>, Turkey <dbl>,
+#> #   `United Arab Emirates` <dbl>, `United Kingdom` <dbl>, `United States` <dbl>
 
 has_gaps(filled_data)
 #> # A tibble: 3 x 2
@@ -239,7 +236,7 @@ eer_ts %>%
     title = "REER, differences year-over-year",
     x = "", y = "", color = ""
   )
-#> Warning: Removed 36 rows containing missing values (geom_path).
+#> Warning: Removed 36 row(s) containing missing values (geom_path).
 ```
 
 <img src="man/figures/README-tq_diff-1.png" width="100%" />
@@ -261,7 +258,6 @@ eer_ts %>%
     title = "REER, 6 month moving averages",
     x = "", y = "", color = ""
   )
-#> Warning: Removed 15 rows containing missing values (geom_path).
 ```
 
 <img src="man/figures/README-tq_ma-1.png" width="100%" />
@@ -283,7 +279,7 @@ eer_ts %>%
     title = "REER, year-over-year growth rates",
     x = "", y = "", color = ""
   )
-#> Warning: Removed 36 rows containing missing values (geom_path).
+#> Warning: Removed 36 row(s) containing missing values (geom_path).
 ```
 
 <img src="man/figures/README-tq_gr-1.png" width="100%" />
@@ -398,32 +394,6 @@ tq_range <- cal_factory(
 )
 
 eer_ts %>% 
-  tq_range()
-#> # A tibble: 6 x 62
-#>   date  symbol Algeria Argentina Australia Austria Belgium Brazil Bulgaria
-#>   <chr> <chr>    <dbl>     <dbl>     <dbl>   <dbl>   <dbl>  <dbl>    <dbl>
-#> 1 min   defla~    78.7      22.1      98.5    84.3    88.8   80.5     98.1
-#> 2 max   defla~   152.      184.      112.    101.    102.  1336.    6026. 
-#> 3 min   neer      72.2      12.2      68.8    89.6    89.0   53.5     52.6
-#> 4 max   neer     271.      520.      112.    103.    104.  1102.    2824. 
-#> 5 min   reer      89.1      49.6      64.8    97.5    90.8   42.0     35  
-#> 6 max   reer     186.      284.      112.    112.    107.   110.     105. 
-#> # ... with 53 more variables: Canada <dbl>, Chile <dbl>, China <dbl>,
-#> #   `Chinese Taipei` <dbl>, Colombia <dbl>, Croatia <dbl>, Cyprus <dbl>,
-#> #   `Czech Republic` <dbl>, Denmark <dbl>, Estonia <dbl>, `Euro
-#> #   area` <dbl>, Finland <dbl>, France <dbl>, Germany <dbl>, Greece <dbl>,
-#> #   `Hong Kong SAR` <dbl>, Hungary <dbl>, Iceland <dbl>, India <dbl>,
-#> #   Indonesia <dbl>, Ireland <dbl>, Israel <dbl>, Italy <dbl>,
-#> #   Japan <dbl>, Korea <dbl>, Latvia <dbl>, Lithuania <dbl>,
-#> #   Luxembourg <dbl>, Malaysia <dbl>, Malta <dbl>, Mexico <dbl>,
-#> #   Netherlands <dbl>, `New Zealand` <dbl>, Norway <dbl>, Peru <dbl>,
-#> #   Philippines <dbl>, Poland <dbl>, Portugal <dbl>, Romania <dbl>,
-#> #   Russia <dbl>, `Saudi Arabia` <dbl>, Singapore <dbl>, Slovakia <dbl>,
-#> #   Slovenia <dbl>, `South Africa` <dbl>, Spain <dbl>, Sweden <dbl>,
-#> #   Switzerland <dbl>, Thailand <dbl>, Turkey <dbl>, `United Arab
-#> #   Emirates` <dbl>, `United Kingdom` <dbl>, `United States` <dbl>
-
-eer_ts %>% 
   tq_range() %>% 
   gather(key = "area", value = "value", -date, -symbol) %>% 
   spread(key = date, value = value) %>% 
@@ -443,7 +413,7 @@ eer_ts %>%
 #>  8 deflator Hungary     272.  95.8   177.
 #>  9 deflator Colombia    258.  89.7   168.
 #> 10 deflator Argentina   184.  22.1   162.
-#> # ... with 50 more rows
+#> # … with 50 more rows
 ```
 
 Another dirty example. I calculate deflators’ rates of change from the
@@ -457,13 +427,6 @@ defl_gr1 <- eer_ts %>%
   filter(symbol == "deflator") %>% 
   tq_gr(n = 1) %>% 
   filter(!is.na(Algeria))
-
-acf(defl_gr1$Algeria, lag.max = 24)
-```
-
-<img src="man/figures/README-dirty_example2-1.png" width="100%" />
-
-``` r
 
 tq_acf <- cal_factory(
   function(num) {
@@ -495,7 +458,7 @@ defl_gr1 %>%
 #>  8 acf12 deflator France         0.668
 #>  9 acf12 deflator Czech Republic 0.659
 #> 10 acf12 deflator Turkey         0.656
-#> # ... with 50 more rows
+#> # … with 50 more rows
 ```
 
 ## cal\_factory\_zoo: function factory for calculation utilizing zoo package
@@ -516,27 +479,15 @@ tq_rollmean <- cal_factory_zoo(
 )
 
 all_equal(
-   tq_rollmean(eer_ts, k = 3, align = "right", fill = NA),
-   tq_ma(eer_ts, n = 3)
-)
-#> [1] "Rows in x but not y: 317, 809, 799, 98, 253, 379, 279, 3, 327, 835, 41[...]. Rows in y but not x: 150, 310, 665, 470, 172, 516, 339, 878, 617, 267, 237[...]. "
-
-all_equal(
    tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)[, "date"],
    tq_ma(eer_ts, n = 3)[, "date"]
 )
 #> [1] TRUE
 
-all_equal(
-   tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)[, "Algeria"],
-   tq_ma(eer_ts, n = 3)[, "Algeria"]
-)
-#> [1] "Rows in x but not y: 137, 458, 892, 81, 163, 190, 644, 176, 494, 267, 841[...]. Rows in y but not x: 892, 81, 163, 190, 644, 176, 494, 267, 841, 12, 832[...]. Rows with difference occurences in x and y: 537, 495, 493, 522, 488, 389"
-
 near(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)$Algeria,
      tq_ma(eer_ts, n = 3)$Algeria) %>%
   all(na.rm = TRUE)
-#> [1] TRUE
+#> [1] FALSE
 ```
 
 Speed is comparable. If you need speed, don’t mind which function to
@@ -545,20 +496,20 @@ choose, instead consider to spread to wide format.
 ``` r
 system.time(tq_ma(eer_ts, n = 3))
 #>    user  system elapsed 
-#>    0.36    0.00    0.36
+#>   0.404   0.000   0.404
 system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>    0.55    0.00    0.54
+#>   0.504   0.000   0.504
 
 eer_ts_long <- eer_ts %>% 
   gather(key = "area", value = "value", -date, -symbol)
 
 system.time(tq_ma(eer_ts_long, n = 3))
 #>    user  system elapsed 
-#>    6.68    3.50   10.23
+#>    1.11    0.00    1.11
 system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>    7.19    3.90   11.11
+#>   1.539   0.000   1.540
 ```
 
 ## cal\_factory\_ts: function factory for calculation utilizing ts class
@@ -621,39 +572,37 @@ eer_ts %>%
 #>  8 deflator    106.     106.    104.      104.  1995 Q4
 #>  9 deflator    100.     100.     98.5      98.5 1996 Q1
 #> 10 deflator     98.9     98.9    95.1      95.1 1996 Q2
-#> # ... with 296 more rows
+#> # … with 296 more rows
 
 eer_ts %>% 
   tq_to_quarters(OHLC = FALSE)
 #> # A tsibble: 306 x 62 [1Q]
 #> # Key:       symbol [3]
-#>          date symbol Algeria Argentina Australia Austria Belgium Brazil
-#>         <qtr> <chr>    <dbl>     <dbl>     <dbl>   <dbl>   <dbl>  <dbl>
-#>  1    1994 Q1 defla~   144.       100.      107.    84.6    89.7   673.
-#>  2    1994 Q2 defla~   134.       130.      108.    85.6    90.4   224.
-#>  3    1994 Q3 defla~   123.       132.      108.    85.6    90.8   205.
-#>  4    1994 Q4 defla~   121.       134.      108.    87.0    91.7   193.
-#>  5    1995 Q1 defla~   113.       136.      107.    87.2    92.6   188.
-#>  6    1995 Q2 defla~   109.       140.      107.    87.8    93.2   177.
-#>  7    1995 Q3 defla~   106.       141.      106.    88.2    93.5   171.
-#>  8    1995 Q4 defla~   104.       143.      106.    89.2    93.8   164.
-#>  9    1996 Q1 defla~    98.5      147.      107.    89.4    94.0   162.
-#> 10    1996 Q2 defla~    95.1      150.      107.    89.7    94.6   157.
-#> # ... with 296 more rows, and 54 more variables: Bulgaria <dbl>,
-#> #   Canada <dbl>, Chile <dbl>, China <dbl>, `Chinese Taipei` <dbl>,
-#> #   Colombia <dbl>, Croatia <dbl>, Cyprus <dbl>, `Czech Republic` <dbl>,
-#> #   Denmark <dbl>, Estonia <dbl>, `Euro area` <dbl>, Finland <dbl>,
-#> #   France <dbl>, Germany <dbl>, Greece <dbl>, `Hong Kong SAR` <dbl>,
-#> #   Hungary <dbl>, Iceland <dbl>, India <dbl>, Indonesia <dbl>,
-#> #   Ireland <dbl>, Israel <dbl>, Italy <dbl>, Japan <dbl>, Korea <dbl>,
-#> #   Latvia <dbl>, Lithuania <dbl>, Luxembourg <dbl>, Malaysia <dbl>,
-#> #   Malta <dbl>, Mexico <dbl>, Netherlands <dbl>, `New Zealand` <dbl>,
-#> #   Norway <dbl>, Peru <dbl>, Philippines <dbl>, Poland <dbl>,
+#>       date symbol Algeria Argentina Australia Austria Belgium Brazil Bulgaria
+#>      <qtr> <chr>    <dbl>     <dbl>     <dbl>   <dbl>   <dbl>  <dbl>    <dbl>
+#>  1 1994 Q1 defla…   144.       100.      107.    84.6    89.7   673.    5521.
+#>  2 1994 Q2 defla…   134.       130.      108.    85.6    90.4   224.    4223.
+#>  3 1994 Q3 defla…   123.       132.      108.    85.6    90.8   205.    3691.
+#>  4 1994 Q4 defla…   121.       134.      108.    87.0    91.7   193.    3272.
+#>  5 1995 Q1 defla…   113.       136.      107.    87.2    92.6   188.    3056.
+#>  6 1995 Q2 defla…   109.       140.      107.    87.8    93.2   177.    3075.
+#>  7 1995 Q3 defla…   106.       141.      106.    88.2    93.5   171.    2951.
+#>  8 1995 Q4 defla…   104.       143.      106.    89.2    93.8   164.    2792.
+#>  9 1996 Q1 defla…    98.5      147.      107.    89.4    94.0   162.    2681.
+#> 10 1996 Q2 defla…    95.1      150.      107.    89.7    94.6   157.    1997.
+#> # … with 296 more rows, and 53 more variables: Canada <dbl>, Chile <dbl>,
+#> #   China <dbl>, `Chinese Taipei` <dbl>, Colombia <dbl>, Croatia <dbl>,
+#> #   Cyprus <dbl>, `Czech Republic` <dbl>, Denmark <dbl>, Estonia <dbl>, `Euro
+#> #   area` <dbl>, Finland <dbl>, France <dbl>, Germany <dbl>, Greece <dbl>,
+#> #   `Hong Kong SAR` <dbl>, Hungary <dbl>, Iceland <dbl>, India <dbl>,
+#> #   Indonesia <dbl>, Ireland <dbl>, Israel <dbl>, Italy <dbl>, Japan <dbl>,
+#> #   Korea <dbl>, Latvia <dbl>, Lithuania <dbl>, Luxembourg <dbl>,
+#> #   Malaysia <dbl>, Malta <dbl>, Mexico <dbl>, Netherlands <dbl>, `New
+#> #   Zealand` <dbl>, Norway <dbl>, Peru <dbl>, Philippines <dbl>, Poland <dbl>,
 #> #   Portugal <dbl>, Romania <dbl>, Russia <dbl>, `Saudi Arabia` <dbl>,
 #> #   Singapore <dbl>, Slovakia <dbl>, Slovenia <dbl>, `South Africa` <dbl>,
-#> #   Spain <dbl>, Sweden <dbl>, Switzerland <dbl>, Thailand <dbl>,
-#> #   Turkey <dbl>, `United Arab Emirates` <dbl>, `United Kingdom` <dbl>,
-#> #   `United States` <dbl>
+#> #   Spain <dbl>, Sweden <dbl>, Switzerland <dbl>, Thailand <dbl>, Turkey <dbl>,
+#> #   `United Arab Emirates` <dbl>, `United Kingdom` <dbl>, `United States` <dbl>
 ```
 
 EOL

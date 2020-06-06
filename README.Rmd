@@ -275,9 +275,6 @@ tq_range <- cal_factory(
 )
 
 eer_ts %>% 
-  tq_range()
-
-eer_ts %>% 
   tq_range() %>% 
   gather(key = "area", value = "value", -date, -symbol) %>% 
   spread(key = date, value = value) %>% 
