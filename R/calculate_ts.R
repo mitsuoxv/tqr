@@ -92,7 +92,7 @@ cal_factory_ts <-
       }
 
       calculated <- df %>%
-        dplyr::group_nest(!!!key_v) %>%
+        tidyr::nest(data = !c(!!!key_v)) %>%
         dplyr::mutate(data = purrr::map(data, mutate_fun)) %>%
         tidyr::unnest(data)
 
