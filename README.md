@@ -483,20 +483,20 @@ choose, instead consider to spread to wide format.
 ``` r
 system.time(tq_ma(eer_ts, n = 3))
 #>    user  system elapsed 
-#>   0.337   0.000   0.338
+#>   0.324   0.000   0.325
 system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   0.522   0.000   0.522
+#>   0.519   0.000   0.520
 
 eer_ts_long <- eer_ts %>% 
   gather(key = "area", value = "value", -date, -symbol)
 
 system.time(tq_ma(eer_ts_long, n = 3))
 #>    user  system elapsed 
-#>   1.193   0.000   1.194
+#>   1.024   0.000   1.026
 system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   1.531   0.003   1.536
+#>   1.519   0.004   1.524
 ```
 
 ## cal\_factory\_ts: function factory for calculation utilizing ts class

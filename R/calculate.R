@@ -50,11 +50,9 @@ cal_factory <-
       }
 
       calculated <- df %>%
-        dplyr::group_by(!!!key_v) %>%
-        tidyr::nest() %>%
+        dplyr::group_nest(!!!key_v) %>%
         dplyr::mutate(data = purrr::map(data, mutate_fun)) %>%
-        tidyr::unnest(data) %>%
-        dplyr::ungroup()
+        tidyr::unnest(data)
 
       interval_output <- fun_itv(interval_input)
 
