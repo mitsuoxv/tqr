@@ -47,11 +47,10 @@ When I utilize [`tidyquant` package](https://cran.r-project.org/web/packages/tid
 
 This package is only for my own use for now. "You" means "future me".
 
-You can install the development version with:
+You can install by:
 
-``` r
+```r
 remotes::install_github("mitsuoxv/tqr")
-
 ```
 
 ## Libraries
@@ -315,7 +314,7 @@ defl_gr1 %>%
 
 ## cal_factory_zoo: function factory for calculation utilizing zoo package
 
-You can utilize functions in zoo package in `cal_factory_zoo`. Here, for example, I utilize `zoo::rollmean`, and manufacture `tq_rollmean`, which has the same functionality of `tq_ma`. Although the output is not exactly the same due to floating point calculations, you can consider it as the same with `near` tolerance.
+You can utilize functions in zoo package in `cal_factory_zoo`. Here, for example, I utilize `zoo::rollmean`, and manufacture `tq_rollmean`, which has the same functionality of `tq_ma`.
 
 ```{r cal_factory_zoo}
 tq_rollmean <- cal_factory_zoo(
@@ -325,16 +324,6 @@ tq_rollmean <- cal_factory_zoo(
   function(idx) idx,
   function(itv) itv
 )
-
-all_equal(
-   tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)[, "date"],
-   tq_ma(eer_ts, n = 3)[, "date"]
-)
-
-near(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)$Algeria,
-     tq_ma(eer_ts, n = 3)$Algeria) %>%
-  all(na.rm = TRUE)
-
 
 ```
 

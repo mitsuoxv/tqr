@@ -68,7 +68,7 @@ to build this package to facilitate my work.
 
 This package is only for my own use for now. “You” means “future me”.
 
-You can install the development version with:
+You can install by:
 
 ``` r
 remotes::install_github("mitsuoxv/tqr")
@@ -92,20 +92,20 @@ publishes on [its site](https://www.bis.org/statistics/eer.htm).
 
 ``` r
 eer
-#> # A tibble: 915 x 62
+#> # A tibble: 948 x 62
 #>    date       symbol Algeria Argentina Australia Austria Belgium Brazil Bulgaria
 #>    <date>     <chr>    <dbl>     <dbl>     <dbl>   <dbl>   <dbl>  <dbl>    <dbl>
-#>  1 1994-01-31 defla…    152.      84.2      106.    84.3    88.8  1336.    6026.
-#>  2 1994-02-28 defla…    147.      91.7      107.    84.5    89.2   957.    5865.
-#>  3 1994-03-31 defla…    144.     100.       107.    84.6    89.7   673.    5521.
-#>  4 1994-04-30 defla…    142.     109.       107.    85.1    90.1   474.    4635.
-#>  5 1994-05-31 defla…    135.     119.       108.    85.4    90.3   330.    4351.
-#>  6 1994-06-30 defla…    134.     130.       108.    85.6    90.4   224.    4223.
-#>  7 1994-07-31 defla…    133.     131.       108.    84.8    90.1   211.    4219.
-#>  8 1994-08-31 defla…    129.     132.       108.    84.7    90.3   208.    4039.
-#>  9 1994-09-30 defla…    123.     132.       108.    85.6    90.8   205.    3691.
-#> 10 1994-10-31 defla…    121.     133.       108.    86.2    91.3   201.    3512.
-#> # … with 905 more rows, and 53 more variables: Canada <dbl>, Chile <dbl>,
+#>  1 1994-01-31 defla…    152.      84.2      106.    84.3    88.8  1336.    6021.
+#>  2 1994-02-28 defla…    147.      91.7      107.    84.5    89.2   957.    5858.
+#>  3 1994-03-31 defla…    144.     100.       107.    84.6    89.7   673.    5515.
+#>  4 1994-04-30 defla…    142.     109.       107.    85.1    90.1   474.    4632.
+#>  5 1994-05-31 defla…    135.     119.       108.    85.4    90.3   330.    4350.
+#>  6 1994-06-30 defla…    134.     130.       108.    85.6    90.4   224.    4222.
+#>  7 1994-07-31 defla…    133.     131.       108.    84.8    90.1   211.    4218.
+#>  8 1994-08-31 defla…    129.     132.       108.    84.7    90.3   208.    4038.
+#>  9 1994-09-30 defla…    123.     132.       108.    85.6    90.8   205.    3690.
+#> 10 1994-10-31 defla…    121.     133.       108.    86.2    91.2   201.    3512.
+#> # … with 938 more rows, and 53 more variables: Canada <dbl>, Chile <dbl>,
 #> #   China <dbl>, `Chinese Taipei` <dbl>, Colombia <dbl>, Croatia <dbl>,
 #> #   Cyprus <dbl>, `Czech Republic` <dbl>, Denmark <dbl>, Estonia <dbl>, `Euro
 #> #   area` <dbl>, Finland <dbl>, France <dbl>, Germany <dbl>, Greece <dbl>,
@@ -182,21 +182,21 @@ has_gaps(corrupt_data)
 filled_data <- fill_gaps(corrupt_data)
 
 filled_data
-#> # A tsibble: 915 x 62 [1M]
+#> # A tsibble: 948 x 62 [1M]
 #> # Key:       symbol [3]
 #>        date symbol Algeria Argentina Australia Austria Belgium Brazil Bulgaria
 #>       <mth> <chr>    <dbl>     <dbl>     <dbl>   <dbl>   <dbl>  <dbl>    <dbl>
-#>  1 1994 Jan defla…    152.      84.2      106.    84.3    88.8  1336.    6026.
-#>  2 1994 Feb defla…    147.      91.7      107.    84.5    89.2   957.    5865.
+#>  1 1994 Jan defla…    152.      84.2      106.    84.3    88.8  1336.    6021.
+#>  2 1994 Feb defla…    147.      91.7      107.    84.5    89.2   957.    5858.
 #>  3 1994 Mar defla…     NA       NA         NA     NA      NA      NA       NA 
-#>  4 1994 Apr defla…    142.     109.       107.    85.1    90.1   474.    4635.
-#>  5 1994 May defla…    135.     119.       108.    85.4    90.3   330.    4351.
-#>  6 1994 Jun defla…    134.     130.       108.    85.6    90.4   224.    4223.
-#>  7 1994 Jul defla…    133.     131.       108.    84.8    90.1   211.    4219.
-#>  8 1994 Aug defla…    129.     132.       108.    84.7    90.3   208.    4039.
-#>  9 1994 Sep defla…    123.     132.       108.    85.6    90.8   205.    3691.
-#> 10 1994 Oct defla…    121.     133.       108.    86.2    91.3   201.    3512.
-#> # … with 905 more rows, and 53 more variables: Canada <dbl>, Chile <dbl>,
+#>  4 1994 Apr defla…    142.     109.       107.    85.1    90.1   474.    4632.
+#>  5 1994 May defla…    135.     119.       108.    85.4    90.3   330.    4350.
+#>  6 1994 Jun defla…    134.     130.       108.    85.6    90.4   224.    4222.
+#>  7 1994 Jul defla…    133.     131.       108.    84.8    90.1   211.    4218.
+#>  8 1994 Aug defla…    129.     132.       108.    84.7    90.3   208.    4038.
+#>  9 1994 Sep defla…    123.     132.       108.    85.6    90.8   205.    3690.
+#> 10 1994 Oct defla…    121.     133.       108.    86.2    91.2   201.    3512.
+#> # … with 938 more rows, and 53 more variables: Canada <dbl>, Chile <dbl>,
 #> #   China <dbl>, `Chinese Taipei` <dbl>, Colombia <dbl>, Croatia <dbl>,
 #> #   Cyprus <dbl>, `Czech Republic` <dbl>, Denmark <dbl>, Estonia <dbl>, `Euro
 #> #   area` <dbl>, Finland <dbl>, France <dbl>, Germany <dbl>, Greece <dbl>,
@@ -403,16 +403,16 @@ eer_ts %>%
 #> # A tibble: 60 x 5
 #>    symbol   area         max   min  range
 #>    <chr>    <chr>      <dbl> <dbl>  <dbl>
-#>  1 deflator Turkey    13053.  51.4 13001.
-#>  2 deflator Bulgaria   6026.  98.1  5928.
-#>  3 deflator Russia     4261.  65.8  4195.
-#>  4 deflator Romania    3328.  94.5  3234.
+#>  1 deflator Turkey    13053.  47.2 13006.
+#>  2 deflator Bulgaria   6021.  98.1  5923.
+#>  3 deflator Russia     4262.  65.1  4197.
+#>  4 deflator Romania    3329.  94.6  3234.
 #>  5 deflator Brazil     1336.  80.5  1256.
-#>  6 deflator Indonesia   418.  78.7   339.
-#>  7 deflator Mexico      346.  83.6   263.
-#>  8 deflator Hungary     272.  95.8   177.
-#>  9 deflator Colombia    258.  89.7   168.
-#> 10 deflator Argentina   184.  22.1   162.
+#>  6 deflator Indonesia   418.  77.9   340.
+#>  7 deflator Mexico      346.  83.0   263.
+#>  8 deflator Hungary     272.  95.1   177.
+#>  9 deflator Colombia    258.  88.5   170.
+#> 10 deflator Argentina   184.  16.0   168.
 #> # … with 50 more rows
 ```
 
@@ -449,15 +449,15 @@ defl_gr1 %>%
 #>    date  symbol   area           value
 #>    <chr> <chr>    <chr>          <dbl>
 #>  1 acf12 deflator Greece         0.891
-#>  2 acf12 deflator Luxembourg     0.826
-#>  3 acf12 deflator Spain          0.793
-#>  4 acf12 deflator Euro area      0.782
-#>  5 acf12 deflator Netherlands    0.753
-#>  6 acf12 deflator Portugal       0.705
-#>  7 acf12 deflator Germany        0.680
-#>  8 acf12 deflator France         0.668
-#>  9 acf12 deflator Czech Republic 0.659
-#> 10 acf12 deflator Turkey         0.656
+#>  2 acf12 deflator Luxembourg     0.831
+#>  3 acf12 deflator Spain          0.802
+#>  4 acf12 deflator Euro area      0.779
+#>  5 acf12 deflator Netherlands    0.744
+#>  6 acf12 deflator Portugal       0.714
+#>  7 acf12 deflator Germany        0.672
+#>  8 acf12 deflator Czech Republic 0.667
+#>  9 acf12 deflator France         0.667
+#> 10 acf12 deflator Colombia       0.655
 #> # … with 50 more rows
 ```
 
@@ -465,9 +465,7 @@ defl_gr1 %>%
 
 You can utilize functions in zoo package in `cal_factory_zoo`. Here, for
 example, I utilize `zoo::rollmean`, and manufacture `tq_rollmean`, which
-has the same functionality of `tq_ma`. Although the output is not
-exactly the same due to floating point calculations, you can consider it
-as the same with `near` tolerance.
+has the same functionality of `tq_ma`.
 
 ``` r
 tq_rollmean <- cal_factory_zoo(
@@ -477,17 +475,6 @@ tq_rollmean <- cal_factory_zoo(
   function(idx) idx,
   function(itv) itv
 )
-
-all_equal(
-   tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)[, "date"],
-   tq_ma(eer_ts, n = 3)[, "date"]
-)
-#> [1] TRUE
-
-near(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)$Algeria,
-     tq_ma(eer_ts, n = 3)$Algeria) %>%
-  all(na.rm = TRUE)
-#> [1] FALSE
 ```
 
 Speed is comparable. If you need speed, don’t mind which function to
@@ -496,20 +483,20 @@ choose, instead consider to spread to wide format.
 ``` r
 system.time(tq_ma(eer_ts, n = 3))
 #>    user  system elapsed 
-#>   0.401   0.000   0.402
+#>   0.337   0.000   0.338
 system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   0.498   0.000   0.499
+#>   0.522   0.000   0.522
 
 eer_ts_long <- eer_ts %>% 
   gather(key = "area", value = "value", -date, -symbol)
 
 system.time(tq_ma(eer_ts_long, n = 3))
 #>    user  system elapsed 
-#>   1.101   0.004   1.106
+#>   1.193   0.000   1.194
 system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   1.522   0.004   1.527
+#>   1.531   0.003   1.536
 ```
 
 ## cal\_factory\_ts: function factory for calculation utilizing ts class
@@ -558,7 +545,7 @@ tq_to_quarters <- cal_factory_xts(
 eer_ts %>% 
   select(date, symbol, Algeria) %>% 
   tq_to_quarters()
-#> # A tsibble: 306 x 6 [1Q]
+#> # A tsibble: 318 x 6 [1Q]
 #> # Key:       symbol [3]
 #>    symbol   num.Open num.High num.Low num.Close    date
 #>    <chr>       <dbl>    <dbl>   <dbl>     <dbl>   <qtr>
@@ -572,25 +559,25 @@ eer_ts %>%
 #>  8 deflator    106.     106.    104.      104.  1995 Q4
 #>  9 deflator    100.     100.     98.5      98.5 1996 Q1
 #> 10 deflator     98.9     98.9    95.1      95.1 1996 Q2
-#> # … with 296 more rows
+#> # … with 308 more rows
 
 eer_ts %>% 
   tq_to_quarters(OHLC = FALSE)
-#> # A tsibble: 306 x 62 [1Q]
+#> # A tsibble: 318 x 62 [1Q]
 #> # Key:       symbol [3]
 #>       date symbol Algeria Argentina Australia Austria Belgium Brazil Bulgaria
 #>      <qtr> <chr>    <dbl>     <dbl>     <dbl>   <dbl>   <dbl>  <dbl>    <dbl>
-#>  1 1994 Q1 defla…   144.       100.      107.    84.6    89.7   673.    5521.
-#>  2 1994 Q2 defla…   134.       130.      108.    85.6    90.4   224.    4223.
-#>  3 1994 Q3 defla…   123.       132.      108.    85.6    90.8   205.    3691.
-#>  4 1994 Q4 defla…   121.       134.      108.    87.0    91.7   193.    3272.
-#>  5 1995 Q1 defla…   113.       136.      107.    87.2    92.6   188.    3056.
-#>  6 1995 Q2 defla…   109.       140.      107.    87.8    93.2   177.    3075.
+#>  1 1994 Q1 defla…   144.       100.      107.    84.6    89.7   673.    5515.
+#>  2 1994 Q2 defla…   134.       130.      108.    85.6    90.4   224.    4222.
+#>  3 1994 Q3 defla…   123.       132.      108.    85.6    90.8   205.    3690.
+#>  4 1994 Q4 defla…   121.       134.      108.    87.0    91.7   193.    3273.
+#>  5 1995 Q1 defla…   113.       136.      107.    87.2    92.6   188.    3055.
+#>  6 1995 Q2 defla…   109.       140.      107.    87.8    93.2   177.    3074.
 #>  7 1995 Q3 defla…   106.       141.      106.    88.2    93.5   171.    2951.
-#>  8 1995 Q4 defla…   104.       143.      106.    89.2    93.8   164.    2792.
+#>  8 1995 Q4 defla…   104.       143.      106.    89.1    93.8   164.    2790.
 #>  9 1996 Q1 defla…    98.5      147.      107.    89.4    94.0   162.    2681.
-#> 10 1996 Q2 defla…    95.1      150.      107.    89.7    94.6   157.    1997.
-#> # … with 296 more rows, and 53 more variables: Canada <dbl>, Chile <dbl>,
+#> 10 1996 Q2 defla…    95.1      150.      107.    89.8    94.6   157.    1997.
+#> # … with 308 more rows, and 53 more variables: Canada <dbl>, Chile <dbl>,
 #> #   China <dbl>, `Chinese Taipei` <dbl>, Colombia <dbl>, Croatia <dbl>,
 #> #   Cyprus <dbl>, `Czech Republic` <dbl>, Denmark <dbl>, Estonia <dbl>, `Euro
 #> #   area` <dbl>, Finland <dbl>, France <dbl>, Germany <dbl>, Greece <dbl>,
