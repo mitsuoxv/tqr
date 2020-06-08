@@ -106,8 +106,30 @@ tq_diff <- cal_factory(
 #' }
 #' @export
 tq_ma <- cal_factory(
-  function(num, n = 3, na.rm = FALSE, .align = "right", ...) {
-    slider::slide_dbl(num, mean, na.rm = na.rm, .size = n, .align = .align, ...)
+  function(num, n = 3, na.rm = FALSE, .align = "right", .step = 1L, .complete = TRUE) {
+
+    if (.align == "right") {
+      b = n - 1
+      a = 0
+    } else if (.align == "left") {
+      b = 0
+      a = n - 1
+    } else if ((n %% 2) == 0) {
+      if (.align == "center-left") {
+        b = n / 2 - 1
+        a = n / 2
+      } else if (.align == "center-right") {
+        b = n / 2
+        a = n / 2 - 1
+      } else stop('Set .align either "centre-right", "center-left", "right" or "left"')
+    } else if (.align == "center") {
+      b = floor(n / 2)
+      a = floor(n / 2)
+    } else stop('Set .align either "centre", "right" or "left"')
+
+    slider::slide_dbl(num, mean, na.rm = na.rm,
+                      .before = b, .after = a,
+                      .step = .step, .complete = .complete)
   },
   function(idx) {
     idx

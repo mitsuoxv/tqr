@@ -6,8 +6,8 @@ output:
   github_document:
     toc: TRUE
 editor_options: 
-  chunk_output_type: console
   
+  chunk_output_type: console
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -47,10 +47,11 @@ When I utilize [`tidyquant` package](https://cran.r-project.org/web/packages/tid
 
 This package is only for my own use for now. "You" means "future me".
 
-You can install by:
+You can install the development version with:
 
-```r
+``` r
 remotes::install_github("mitsuoxv/tqr")
+
 ```
 
 ## Libraries
@@ -314,7 +315,7 @@ defl_gr1 %>%
 
 ## cal_factory_zoo: function factory for calculation utilizing zoo package
 
-You can utilize functions in zoo package in `cal_factory_zoo`. Here, for example, I utilize `zoo::rollmean`, and manufacture `tq_rollmean`, which has the same functionality of `tq_ma`.
+You can utilize functions in zoo package in `cal_factory_zoo`. Here, for example, I utilize `zoo::rollmean`, and manufacture `tq_rollmean`, which has the same functionality of `tq_ma`. Although the output is not exactly the same due to floating point calculations, you can consider it as the same with `near` tolerance.
 
 ```{r cal_factory_zoo}
 tq_rollmean <- cal_factory_zoo(
@@ -324,6 +325,16 @@ tq_rollmean <- cal_factory_zoo(
   function(idx) idx,
   function(itv) itv
 )
+
+all_equal(
+   tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)[, "date"],
+   tq_ma(eer_ts, n = 3)[, "date"]
+)
+
+near(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)$Algeria,
+     tq_ma(eer_ts, n = 3)$Algeria) %>%
+  all(na.rm = TRUE)
+
 
 ```
 

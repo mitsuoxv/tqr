@@ -38,7 +38,7 @@ Mitsuo Shiota
 status](https://travis-ci.org/mitsuoxv/tqr.svg?branch=master)](https://travis-ci.org/mitsuoxv/tqr)
 <!-- badges: end -->
 
-Updated: 2020-06-07
+Updated: 2020-06-08
 
 # tqr: add-on to tsibble, inspired by tidyquant
 
@@ -68,7 +68,7 @@ to build this package to facilitate my work.
 
 This package is only for my own use for now. “You” means “future me”.
 
-You can install by:
+You can install the development version with:
 
 ``` r
 remotes::install_github("mitsuoxv/tqr")
@@ -258,6 +258,7 @@ eer_ts %>%
     title = "REER, 6 month moving averages",
     x = "", y = "", color = ""
   )
+#> Warning: Removed 15 row(s) containing missing values (geom_path).
 ```
 
 <img src="man/figures/README-tq_ma-1.png" width="100%" />
@@ -465,7 +466,9 @@ defl_gr1 %>%
 
 You can utilize functions in zoo package in `cal_factory_zoo`. Here, for
 example, I utilize `zoo::rollmean`, and manufacture `tq_rollmean`, which
-has the same functionality of `tq_ma`.
+has the same functionality of `tq_ma`. Although the output is not
+exactly the same due to floating point calculations, you can consider it
+as the same with `near` tolerance.
 
 ``` r
 tq_rollmean <- cal_factory_zoo(
@@ -475,6 +478,17 @@ tq_rollmean <- cal_factory_zoo(
   function(idx) idx,
   function(itv) itv
 )
+
+all_equal(
+   tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)[, "date"],
+   tq_ma(eer_ts, n = 3)[, "date"]
+)
+#> [1] TRUE
+
+near(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)$Algeria,
+     tq_ma(eer_ts, n = 3)$Algeria) %>%
+  all(na.rm = TRUE)
+#> [1] TRUE
 ```
 
 Speed is comparable. If you need speed, don’t mind which function to
@@ -483,20 +497,20 @@ choose, instead consider to spread to wide format.
 ``` r
 system.time(tq_ma(eer_ts, n = 3))
 #>    user  system elapsed 
-#>   0.323   0.001   0.323
+#>     0.3     0.0     0.3
 system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   0.513   0.000   0.513
+#>   0.498   0.000   0.498
 
 eer_ts_long <- eer_ts %>% 
   gather(key = "area", value = "value", -date, -symbol)
 
 system.time(tq_ma(eer_ts_long, n = 3))
 #>    user  system elapsed 
-#>   1.091   0.003   1.095
+#>   1.060   0.000   1.062
 system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   1.574   0.000   1.575
+#>   1.500   0.000   1.501
 ```
 
 ## cal\_factory\_ts: function factory for calculation utilizing ts class
