@@ -12,8 +12,6 @@ cal_factory_ts(fun_num, fun_idx, fun_itv)
 \item{fun_idx}{A function to transform a numeric vector representing time.}
 
 \item{fun_itv}{A function to transform a string representing interval.}
-
-\item{...}{Arguments for fun_num.}
 }
 \value{
 A function to transform a tsibble into a tsibble or a tibble.
