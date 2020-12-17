@@ -121,7 +121,7 @@ Let us see the differences year-over-year.
 ```{r tq_diff, fig.width=8, fig.height=4}
 eer_ts %>% 
   tq_diff(n = 12) %>% 
-  gather(key = "area", value = "value", -date, -symbol) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
   filter(symbol == "reer") %>% 
   filter(area %in% c("Japan", "Euro area", "United States")) %>% 
   ggplot(aes(x = date, y = value, color = area)) +
@@ -129,7 +129,7 @@ eer_ts %>%
   geom_line() +
   labs(
     title = "REER, differences year-over-year",
-    x = "", y = "", color = ""
+    x = NULL, y = NULL, color = NULL
   )
 
 ```
@@ -141,7 +141,7 @@ Let us see 6 month moving average movements.
 ```{r tq_ma, fig.width=8, fig.height=4}
 eer_ts %>% 
   tq_ma(n = 6) %>% 
-  gather(key = "area", value = "value", -date, -symbol) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
   filter(symbol == "reer") %>% 
   filter(area %in% c("Japan", "Euro area", "United States")) %>% 
   ggplot(aes(x = date, y = value, color = area)) +
@@ -149,7 +149,7 @@ eer_ts %>%
   geom_line() +
   labs(
     title = "REER, 6 month moving averages",
-    x = "", y = "", color = ""
+    x = NULL, y = NULL, color = NULL
   )
 
 ```
@@ -161,7 +161,7 @@ Let us see year-over-year growth rates, percents.
 ```{r tq_gr, fig.width=8, fig.height=4}
 eer_ts %>% 
   tq_gr(n = 12) %>% 
-  gather(key = "area", value = "value", -date, -symbol) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
   filter(symbol == "reer") %>% 
   filter(area %in% c("Japan", "Euro area", "United States")) %>% 
   ggplot(aes(x = date, y = value, color = area)) +
@@ -169,7 +169,7 @@ eer_ts %>%
   geom_line() +
   labs(
     title = "REER, year-over-year growth rates",
-    x = "", y = "", color = ""
+    x = NULL, y = NULL, color = NULL
   )
 
 ```
@@ -180,7 +180,7 @@ You can convert from "month" to "quarter".
 
 ```{r convert_freq, fig.width=8, fig.height=4}
 eer_q <- eer_ts %>% 
-  gather(key = "area", value = "value", -date, -symbol) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
   group_by(symbol, area) %>% 
   index_by(quarter = yearquarter(date)) %>% 
   summarize(value = mean(value))
@@ -193,7 +193,7 @@ eer_q %>%
   geom_line() +
   labs(
     title = "REER, quarters",
-    x = "", y = "", color = ""
+    x = NULL, y = NULL, color = NULL
   )
 
 ```
@@ -206,7 +206,7 @@ Let us get seasonally adjust values. `tq_sa` utilizes [`seasonal` package](https
 
 ```{r tq_sa, fig.width=8, fig.height=4}
 greece <- eer_ts %>% 
-  gather(key = "area", value = "value", -date, -symbol) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
   filter(symbol == "deflator", area == "Greece") %>% 
   mutate(symbol = "original")
 
@@ -221,7 +221,7 @@ greece %>%
   geom_line() +
   labs(
     title = "Deflator, Greece",
-    x = "", y = "", color = ""
+    x = NULL, y = NULL, color = NULL
   )
 
 ```
@@ -254,7 +254,7 @@ greece %>%
   geom_line() +
   labs(
     title = "Deflator, every 6 month, Greece",
-    x = "", y = "", color = ""
+    x = NULL, y = NULL, color = NULL
   )
 
 ```
@@ -276,8 +276,8 @@ tq_range <- cal_factory(
 
 eer_ts %>% 
   tq_range() %>% 
-  gather(key = "area", value = "value", -date, -symbol) %>% 
-  spread(key = date, value = value) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_wider(names_from = date, values_from = value) %>% 
   mutate(range = max - min) %>% 
   filter(symbol == "deflator") %>% 
   arrange(desc(range))
@@ -307,7 +307,7 @@ tq_acf <- cal_factory(
 defl_gr1 %>% 
   tq_acf() %>% 
   filter(date == "acf12") %>% 
-  gather(key = "area", value = "value", -c(date, symbol)) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
   arrange(desc(value))
 
 
@@ -345,7 +345,7 @@ system.time(tq_ma(eer_ts, n = 3))
 system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
 
 eer_ts_long <- eer_ts %>% 
-  gather(key = "area", value = "value", -date, -symbol)
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value")
 
 system.time(tq_ma(eer_ts_long, n = 3))
 system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))

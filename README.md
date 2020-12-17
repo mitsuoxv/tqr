@@ -38,7 +38,7 @@ Mitsuo Shiota
 status](https://travis-ci.org/mitsuoxv/tqr.svg?branch=master)](https://travis-ci.org/mitsuoxv/tqr)
 <!-- badges: end -->
 
-Updated: 2020-06-08
+Updated: 2020-12-17
 
 # tqr: add-on to tsibble, inspired by tidyquant
 
@@ -226,7 +226,7 @@ Let us see the differences year-over-year.
 ``` r
 eer_ts %>% 
   tq_diff(n = 12) %>% 
-  gather(key = "area", value = "value", -date, -symbol) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
   filter(symbol == "reer") %>% 
   filter(area %in% c("Japan", "Euro area", "United States")) %>% 
   ggplot(aes(x = date, y = value, color = area)) +
@@ -234,7 +234,7 @@ eer_ts %>%
   geom_line() +
   labs(
     title = "REER, differences year-over-year",
-    x = "", y = "", color = ""
+    x = NULL, y = NULL, color = NULL
   )
 #> Warning: Removed 36 row(s) containing missing values (geom_path).
 ```
@@ -248,7 +248,7 @@ Let us see 6 month moving average movements.
 ``` r
 eer_ts %>% 
   tq_ma(n = 6) %>% 
-  gather(key = "area", value = "value", -date, -symbol) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
   filter(symbol == "reer") %>% 
   filter(area %in% c("Japan", "Euro area", "United States")) %>% 
   ggplot(aes(x = date, y = value, color = area)) +
@@ -256,7 +256,7 @@ eer_ts %>%
   geom_line() +
   labs(
     title = "REER, 6 month moving averages",
-    x = "", y = "", color = ""
+    x = NULL, y = NULL, color = NULL
   )
 #> Warning: Removed 15 row(s) containing missing values (geom_path).
 ```
@@ -270,7 +270,7 @@ Let us see year-over-year growth rates, percents.
 ``` r
 eer_ts %>% 
   tq_gr(n = 12) %>% 
-  gather(key = "area", value = "value", -date, -symbol) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
   filter(symbol == "reer") %>% 
   filter(area %in% c("Japan", "Euro area", "United States")) %>% 
   ggplot(aes(x = date, y = value, color = area)) +
@@ -278,7 +278,7 @@ eer_ts %>%
   geom_line() +
   labs(
     title = "REER, year-over-year growth rates",
-    x = "", y = "", color = ""
+    x = NULL, y = NULL, color = NULL
   )
 #> Warning: Removed 36 row(s) containing missing values (geom_path).
 ```
@@ -291,7 +291,7 @@ You can convert from “month” to “quarter”.
 
 ``` r
 eer_q <- eer_ts %>% 
-  gather(key = "area", value = "value", -date, -symbol) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
   group_by(symbol, area) %>% 
   index_by(quarter = yearquarter(date)) %>% 
   summarize(value = mean(value))
@@ -304,7 +304,7 @@ eer_q %>%
   geom_line() +
   labs(
     title = "REER, quarters",
-    x = "", y = "", color = ""
+    x = NULL, y = NULL, color = NULL
   )
 ```
 
@@ -320,7 +320,7 @@ package](https://www.rdocumentation.org/packages/seasonal/versions/1.7.0).
 
 ``` r
 greece <- eer_ts %>% 
-  gather(key = "area", value = "value", -date, -symbol) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
   filter(symbol == "deflator", area == "Greece") %>% 
   mutate(symbol = "original")
 
@@ -335,7 +335,7 @@ greece %>%
   geom_line() +
   labs(
     title = "Deflator, Greece",
-    x = "", y = "", color = ""
+    x = NULL, y = NULL, color = NULL
   )
 ```
 
@@ -371,7 +371,7 @@ greece %>%
   geom_line() +
   labs(
     title = "Deflator, every 6 month, Greece",
-    x = "", y = "", color = ""
+    x = NULL, y = NULL, color = NULL
   )
 ```
 
@@ -396,24 +396,24 @@ tq_range <- cal_factory(
 
 eer_ts %>% 
   tq_range() %>% 
-  gather(key = "area", value = "value", -date, -symbol) %>% 
-  spread(key = date, value = value) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_wider(names_from = date, values_from = value) %>% 
   mutate(range = max - min) %>% 
   filter(symbol == "deflator") %>% 
   arrange(desc(range))
 #> # A tibble: 60 x 5
-#>    symbol   area         max   min  range
-#>    <chr>    <chr>      <dbl> <dbl>  <dbl>
-#>  1 deflator Turkey    13053.  47.2 13006.
-#>  2 deflator Bulgaria   6021.  98.1  5923.
-#>  3 deflator Russia     4262.  65.1  4197.
-#>  4 deflator Romania    3329.  94.6  3234.
-#>  5 deflator Brazil     1336.  80.5  1256.
-#>  6 deflator Indonesia   418.  77.9   340.
-#>  7 deflator Mexico      346.  83.0   263.
-#>  8 deflator Hungary     272.  95.1   177.
-#>  9 deflator Colombia    258.  88.5   170.
-#> 10 deflator Argentina   184.  16.0   168.
+#>    symbol   area        min    max  range
+#>    <chr>    <chr>     <dbl>  <dbl>  <dbl>
+#>  1 deflator Turkey     47.2 13053. 13006.
+#>  2 deflator Bulgaria   98.1  6021.  5923.
+#>  3 deflator Russia     65.1  4262.  4197.
+#>  4 deflator Romania    94.6  3329.  3234.
+#>  5 deflator Brazil     80.5  1336.  1256.
+#>  6 deflator Indonesia  77.9   418.   340.
+#>  7 deflator Mexico     83.0   346.   263.
+#>  8 deflator Hungary    95.1   272.   177.
+#>  9 deflator Colombia   88.5   258.   170.
+#> 10 deflator Argentina  16.0   184.   168.
 #> # … with 50 more rows
 ```
 
@@ -444,21 +444,21 @@ tq_acf <- cal_factory(
 defl_gr1 %>% 
   tq_acf() %>% 
   filter(date == "acf12") %>% 
-  gather(key = "area", value = "value", -c(date, symbol)) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
   arrange(desc(value))
 #> # A tibble: 60 x 4
-#>    date  symbol   area           value
-#>    <chr> <chr>    <chr>          <dbl>
-#>  1 acf12 deflator Greece         0.891
-#>  2 acf12 deflator Luxembourg     0.831
-#>  3 acf12 deflator Spain          0.802
-#>  4 acf12 deflator Euro area      0.779
-#>  5 acf12 deflator Netherlands    0.744
-#>  6 acf12 deflator Portugal       0.714
-#>  7 acf12 deflator Germany        0.672
-#>  8 acf12 deflator Czech Republic 0.667
-#>  9 acf12 deflator France         0.667
-#> 10 acf12 deflator Colombia       0.655
+#>    date  symbol   area                 value
+#>    <chr> <chr>    <chr>          <dbl[,1,1]>
+#>  1 acf12 deflator Greece               0.891
+#>  2 acf12 deflator Luxembourg           0.831
+#>  3 acf12 deflator Spain                0.802
+#>  4 acf12 deflator Euro area            0.779
+#>  5 acf12 deflator Netherlands          0.744
+#>  6 acf12 deflator Portugal             0.714
+#>  7 acf12 deflator Germany              0.672
+#>  8 acf12 deflator Czech Republic       0.667
+#>  9 acf12 deflator France               0.667
+#> 10 acf12 deflator Colombia             0.655
 #> # … with 50 more rows
 ```
 
@@ -497,20 +497,20 @@ choose, instead consider to spread to wide format.
 ``` r
 system.time(tq_ma(eer_ts, n = 3))
 #>    user  system elapsed 
-#>     0.3     0.0     0.3
+#>   0.246   0.000   0.246
 system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   0.498   0.000   0.498
+#>   0.484   0.000   0.485
 
 eer_ts_long <- eer_ts %>% 
-  gather(key = "area", value = "value", -date, -symbol)
+  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value")
 
 system.time(tq_ma(eer_ts_long, n = 3))
 #>    user  system elapsed 
-#>   1.060   0.000   1.062
+#>   0.759   0.000   0.760
 system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   1.500   0.000   1.501
+#>   1.156   0.012   1.169
 ```
 
 ## cal\_factory\_ts: function factory for calculation utilizing ts class
