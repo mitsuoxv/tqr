@@ -57,7 +57,7 @@ cal_factory_zoo <-
       }
 
       calculated <- df %>%
-        tidyr::nest(data = !c(!!!key_v)) %>%
+        tidyr::nest(data = !key_variables) %>%
         dplyr::mutate(data = purrr::map(data, mutate_fun)) %>%
         tidyr::unnest(data)
 
