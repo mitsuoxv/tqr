@@ -38,7 +38,7 @@ Mitsuo Shiota
 status](https://travis-ci.org/mitsuoxv/tqr.svg?branch=master)](https://travis-ci.org/mitsuoxv/tqr)
 <!-- badges: end -->
 
-Updated: 2020-12-17
+Updated: 2020-12-24
 
 # tqr: add-on to tsibble, inspired by tidyquant
 
@@ -497,20 +497,20 @@ choose, instead consider to spread to wide format.
 ``` r
 system.time(tq_ma(eer_ts, n = 3))
 #>    user  system elapsed 
-#>   0.246   0.000   0.246
+#>   0.248   0.000   0.248
 system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   0.484   0.000   0.485
+#>   0.472   0.000   0.471
 
 eer_ts_long <- eer_ts %>% 
   pivot_longer(!c(date, symbol), names_to = "area", values_to = "value")
 
 system.time(tq_ma(eer_ts_long, n = 3))
 #>    user  system elapsed 
-#>   0.759   0.000   0.760
+#>   0.763   0.003   0.768
 system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   1.156   0.012   1.169
+#>   1.176   0.001   1.177
 ```
 
 ## cal\_factory\_ts: function factory for calculation utilizing ts class
