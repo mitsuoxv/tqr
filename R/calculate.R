@@ -72,7 +72,7 @@ cal_factory <-
 #' Calculate differences.
 #'
 #' @param df_ts A tbl_ts object.
-#' @param n An interval of difference.
+#' @param ... Parameter: n, an interval of difference.
 #' @return A tbl_ts object.
 #' @examples
 #' \dontrun{
@@ -96,11 +96,7 @@ tq_diff <- cal_factory(
 #' Calculate moving averages.
 #'
 #' @param df_ts A tbl_ts object.
-#' @param n A width of moving window.
-#' @param na.rm A parameter for mean.
-#' @param .align An align position: "right", "left", "center" if odd n, "center-right", "center-left" if even n.
-#' @param .step A slide step for slider::slide_dbl.
-#' @param .complete A boolean for slider::slide_dbl.
+#' @param ... Parameters: n, width of moving window. na.rm, a parameter for mean. .align, an align position: "right", "left", "center" if odd n, "center-right", "center-left" if even n. .step, a slide step for slider::slide_dbl. .complete, a boolean for slider::slide_dbl.
 #' @return A tbl_ts object.
 #' @examples
 #' \dontrun{
@@ -146,8 +142,7 @@ tq_ma <- cal_factory(
 #' Calculate growth rates.
 #'
 #' @param df_ts A tbl_ts object.
-#' @param n An interval of difference.
-#' @param annualize A parameter of power.
+#' @param ... Parameters: n, an interval of difference. annualize, a parameter of power.
 #' @return A tbl_ts object.
 #' @examples
 #' \dontrun{

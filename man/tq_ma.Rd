@@ -9,15 +9,7 @@ tq_ma(df_ts, ...)
 \arguments{
 \item{df_ts}{A tbl_ts object.}
 
-\item{n}{A width of moving window.}
-
-\item{na.rm}{A parameter for mean.}
-
-\item{.align}{An align position: "right", "left", "center" if odd n, "center-right", "center-left" if even n.}
-
-\item{.step}{A slide step for slider::slide_dbl.}
-
-\item{.complete}{A boolean for slider::slide_dbl.}
+\item{...}{Parameters: n, width of moving window. na.rm, a parameter for mean. .align, an align position: "right", "left", "center" if odd n, "center-right", "center-left" if even n. .step, a slide step for slider::slide_dbl. .complete, a boolean for slider::slide_dbl.}
 }
 \value{
 A tbl_ts object.

@@ -9,9 +9,7 @@ tq_gr(df_ts, ...)
 \arguments{
 \item{df_ts}{A tbl_ts object.}
 
-\item{n}{An interval of difference.}
-
-\item{annualize}{A parameter of power.}
+\item{...}{Parameters: n, an interval of difference. annualize, a parameter of power.}
 }
 \value{
 A tbl_ts object.

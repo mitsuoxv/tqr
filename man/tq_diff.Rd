@@ -9,7 +9,7 @@ tq_diff(df_ts, ...)
 \arguments{
 \item{df_ts}{A tbl_ts object.}
 
-\item{n}{An interval of difference.}
+\item{...}{Parameter: n, an interval of difference.}
 }
 \value{
 A tbl_ts object.
