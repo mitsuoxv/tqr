@@ -72,12 +72,12 @@ cal_factory <-
 #' Calculate differences.
 #'
 #' @param df_ts A tbl_ts object.
-#' @param ... Parameters for fun_num.
+#' @param n An interval of difference.
 #' @return A tbl_ts object.
 #' @examples
 #' \dontrun{
-#' tq_diff(df)
-#' tq_diff(df, n = 12)
+#' tq_diff(df_ts) # default n = 1
+#' tq_diff(df_ts, n = 12)
 #' }
 #' @export
 tq_diff <- cal_factory(
@@ -96,12 +96,16 @@ tq_diff <- cal_factory(
 #' Calculate moving averages.
 #'
 #' @param df_ts A tbl_ts object.
-#' @param ... Parameters for fun_num.
+#' @param n A width of moving window.
+#' @param na.rm A parameter for mean.
+#' @param .align An align position: "right", "left", "center" if odd n, "center-right", "center-left" if even n.
+#' @param .step A slide step for slider::slide_dbl.
+#' @param .complete A boolean for slider::slide_dbl.
 #' @return A tbl_ts object.
 #' @examples
 #' \dontrun{
-#' tq_ma(df)
-#' tq_ma(df, n = 6, na.rm = TRUE, .align = "center-left")
+#' tq_ma(df_ts) # default n = 3, na.rm = FALSE, .align = "right", .step = 1L, .complete = TRUE
+#' tq_ma(df_ts, n = 6, na.rm = TRUE, .align = "center-left")
 #' }
 #' @export
 tq_ma <- cal_factory(
@@ -142,12 +146,13 @@ tq_ma <- cal_factory(
 #' Calculate growth rates.
 #'
 #' @param df_ts A tbl_ts object.
-#' @param ... Parameters for fun_num.
+#' @param n An interval of difference.
+#' @param annualize A parameter of power.
 #' @return A tbl_ts object.
 #' @examples
 #' \dontrun{
-#' tq_gr(df)
-#' tq_gr(df, n = 1, annualize = 4)
+#' tq_gr(df_ts) # default n = 12, annualize = 1
+#' tq_gr(df_ts, n = 1, annualize = 4) # annualize quarterly growth rates
 #' }
 #' @export
 tq_gr <- cal_factory(

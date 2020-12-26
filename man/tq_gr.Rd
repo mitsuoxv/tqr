@@ -9,7 +9,9 @@ tq_gr(df_ts, ...)
 \arguments{
 \item{df_ts}{A tbl_ts object.}
 
-\item{...}{Parameters for fun_num.}
+\item{n}{An interval of difference.}
+
+\item{annualize}{A parameter of power.}
 }
 \value{
 A tbl_ts object.
@@ -19,7 +21,7 @@ Calculate growth rates.
 }
 \examples{
 \dontrun{
-tq_gr(df)
-tq_gr(df, n = 1, annualize = 4)
+tq_gr(df_ts) # default n = 12, annualize = 1
+tq_gr(df_ts, n = 1, annualize = 4) # annualize quarterly growth rates
 }
 }

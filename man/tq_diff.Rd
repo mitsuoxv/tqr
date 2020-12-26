@@ -9,7 +9,7 @@ tq_diff(df_ts, ...)
 \arguments{
 \item{df_ts}{A tbl_ts object.}
 
-\item{...}{Parameters for fun_num.}
+\item{n}{An interval of difference.}
 }
 \value{
 A tbl_ts object.
@@ -19,7 +19,7 @@ Calculate differences.
 }
 \examples{
 \dontrun{
-tq_diff(df)
-tq_diff(df, n = 12)
+tq_diff(df_ts) # default n = 1
+tq_diff(df_ts, n = 12)
 }
 }

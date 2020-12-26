@@ -9,7 +9,15 @@ tq_ma(df_ts, ...)
 \arguments{
 \item{df_ts}{A tbl_ts object.}
 
-\item{...}{Parameters for fun_num.}
+\item{n}{A width of moving window.}
+
+\item{na.rm}{A parameter for mean.}
+
+\item{.align}{An align position: "right", "left", "center" if odd n, "center-right", "center-left" if even n.}
+
+\item{.step}{A slide step for slider::slide_dbl.}
+
+\item{.complete}{A boolean for slider::slide_dbl.}
 }
 \value{
 A tbl_ts object.
@@ -19,7 +27,7 @@ Calculate moving averages.
 }
 \examples{
 \dontrun{
-tq_ma(df)
-tq_ma(df, n = 6, na.rm = TRUE, .align = "center-left")
+tq_ma(df_ts) # default n = 3, na.rm = FALSE, .align = "right", .step = 1L, .complete = TRUE
+tq_ma(df_ts, n = 6, na.rm = TRUE, .align = "center-left")
 }
 }

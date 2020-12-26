@@ -1,7 +1,7 @@
 Package: tqr
 Type: Package
 Title: Add tq_xx functions to tidyquant package to facilitate economic analyses
-Version: 0.0.0.9008
+Version: 0.0.0.9009
 Author: Mitsuo Shiota
 Maintainer: Mitsuo Shiota <mitsuoxv@gmail.com>
 Description: Add utility functions to facilitate economic analyses on
@@ -26,7 +26,7 @@ Imports:
     zoo,
     xts,
     stringr
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Suggests: 
     knitr,
     rmarkdown,
