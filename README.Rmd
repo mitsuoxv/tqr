@@ -121,7 +121,7 @@ Let us see the differences year-over-year.
 ```{r tq_diff, fig.width=8, fig.height=4}
 eer_ts %>% 
   tq_diff(n = 12) %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
   filter(symbol == "reer") %>% 
   filter(area %in% c("Japan", "Euro area", "United States")) %>% 
   ggplot(aes(x = date, y = value, color = area)) +
@@ -141,7 +141,7 @@ Let us see 6 month moving average movements.
 ```{r tq_ma, fig.width=8, fig.height=4}
 eer_ts %>% 
   tq_ma(n = 6) %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
   filter(symbol == "reer") %>% 
   filter(area %in% c("Japan", "Euro area", "United States")) %>% 
   ggplot(aes(x = date, y = value, color = area)) +
@@ -161,7 +161,7 @@ Let us see year-over-year growth rates, percents.
 ```{r tq_gr, fig.width=8, fig.height=4}
 eer_ts %>% 
   tq_gr(n = 12) %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
   filter(symbol == "reer") %>% 
   filter(area %in% c("Japan", "Euro area", "United States")) %>% 
   ggplot(aes(x = date, y = value, color = area)) +
@@ -180,7 +180,7 @@ You can convert from "month" to "quarter".
 
 ```{r convert_freq, fig.width=8, fig.height=4}
 eer_q <- eer_ts %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
   group_by(symbol, area) %>% 
   index_by(quarter = yearquarter(date)) %>% 
   summarize(value = mean(value))
@@ -206,7 +206,7 @@ Let us get seasonally adjust values. `tq_sa` utilizes [`seasonal` package](https
 
 ```{r tq_sa, fig.width=8, fig.height=4}
 greece <- eer_ts %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
   filter(symbol == "deflator", area == "Greece") %>% 
   mutate(symbol = "original")
 
@@ -276,8 +276,8 @@ tq_range <- cal_factory(
 
 eer_ts %>% 
   tq_range() %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
-  pivot_wider(names_from = date, values_from = value) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
+  pivot_wider(names_from = date) %>% 
   mutate(range = max - min) %>% 
   filter(symbol == "deflator") %>% 
   arrange(desc(range))
@@ -307,7 +307,7 @@ tq_acf <- cal_factory(
 defl_gr1 %>% 
   tq_acf() %>% 
   filter(date == "acf12") %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
   arrange(desc(value))
 
 
@@ -345,7 +345,7 @@ system.time(tq_ma(eer_ts, n = 3))
 system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
 
 eer_ts_long <- eer_ts %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value")
+  pivot_longer(!c(date, symbol), names_to = "area")
 
 system.time(tq_ma(eer_ts_long, n = 3))
 system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))

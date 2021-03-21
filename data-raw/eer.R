@@ -26,14 +26,12 @@ neer$symbol <- "neer"
 eer <- bind_rows(reer, neer)
 
 eer <- eer %>%
-  gather(key = "area", value = "value", -date, -symbol) %>%
-  spread(key = symbol, value = value) %>%
+  mutate(date = as.Date(date)) %>%
+  pivot_longer(!c(date, symbol), names_to = "area") %>%
+  pivot_wider(names_from = symbol) %>%
   mutate(deflator = neer / reer * 100) %>%
-  gather(key = "symbol", value = "value", -date, -area) %>%
-  spread(key = area, value = value) %>%
+  pivot_longer(!c(date, area), names_to = "symbol") %>%
+  pivot_wider(names_from = area) %>%
   arrange(symbol, date)
 
-eer$date <- as.Date(eer$date)
-
 usethis::use_data(eer, overwrite = TRUE)
-

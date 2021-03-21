@@ -3,42 +3,41 @@ Introduction to tqr package
 Mitsuo Shiota
 2019-07-19
 
-  - [tqr: add-on to tsibble, inspired by
+-   [tqr: add-on to tsibble, inspired by
     tidyquant](#tqr-add-on-to-tsibble-inspired-by-tidyquant)
-      - [Installation](#installation)
-      - [Libraries](#libraries)
-      - [Create time aware dataframe of tsibble
+    -   [Installation](#installation)
+    -   [Libraries](#libraries)
+    -   [Create time aware dataframe of tsibble
         class](#create-time-aware-dataframe-of-tsibble-class)
-      - [Insert missing rows, if
+    -   [Insert missing rows, if
         necessary](#insert-missing-rows-if-necessary)
-      - [tq\_diff: calculate
+    -   [tq\_diff: calculate
         differences](#tq_diff-calculate-differences)
-      - [tq\_ma: calculate moving
+    -   [tq\_ma: calculate moving
         averages](#tq_ma-calculate-moving-averages)
-      - [tq\_gr: calculate growth rates](#tq_gr-calculate-growth-rates)
-      - [Convert to lower frequency](#convert-to-lower-frequency)
-      - [tq\_sa: calculate seasonally adjusted
+    -   [tq\_gr: calculate growth rates](#tq_gr-calculate-growth-rates)
+    -   [Convert to lower frequency](#convert-to-lower-frequency)
+    -   [tq\_sa: calculate seasonally adjusted
         values](#tq_sa-calculate-seasonally-adjusted-values)
-      - [cal\_factory: function factory for
+    -   [cal\_factory: function factory for
         calculation](#cal_factory-function-factory-for-calculation)
-      - [cal\_factory\_zoo: function factory for calculation utilizing
+    -   [cal\_factory\_zoo: function factory for calculation utilizing
         zoo
         package](#cal_factory_zoo-function-factory-for-calculation-utilizing-zoo-package)
-      - [cal\_factory\_ts: function factory for calculation utilizing ts
+    -   [cal\_factory\_ts: function factory for calculation utilizing ts
         class](#cal_factory_ts-function-factory-for-calculation-utilizing-ts-class)
-      - [cal\_factory\_xts: function factory for calculation utilizing
+    -   [cal\_factory\_xts: function factory for calculation utilizing
         xts
         package](#cal_factory_xts-function-factory-for-calculation-utilizing-xts-package)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
 <!-- badges: start -->
 
 [![Travis build
 status](https://travis-ci.org/mitsuoxv/tqr.svg?branch=master)](https://travis-ci.org/mitsuoxv/tqr)
 <!-- badges: end -->
 
-Updated: 2020-12-24
+Updated: 2021-03-21
 
 # tqr: add-on to tsibble, inspired by tidyquant
 
@@ -106,18 +105,19 @@ eer
 #>  9 1994-09-30 defla…    123.     132.       108.    85.6    90.8   205.    3690.
 #> 10 1994-10-31 defla…    121.     133.       108.    86.2    91.2   201.    3512.
 #> # … with 938 more rows, and 53 more variables: Canada <dbl>, Chile <dbl>,
-#> #   China <dbl>, `Chinese Taipei` <dbl>, Colombia <dbl>, Croatia <dbl>,
-#> #   Cyprus <dbl>, `Czech Republic` <dbl>, Denmark <dbl>, Estonia <dbl>, `Euro
-#> #   area` <dbl>, Finland <dbl>, France <dbl>, Germany <dbl>, Greece <dbl>,
-#> #   `Hong Kong SAR` <dbl>, Hungary <dbl>, Iceland <dbl>, India <dbl>,
+#> #   China <dbl>, Chinese Taipei <dbl>, Colombia <dbl>, Croatia <dbl>,
+#> #   Cyprus <dbl>, Czech Republic <dbl>, Denmark <dbl>, Estonia <dbl>,
+#> #   Euro area <dbl>, Finland <dbl>, France <dbl>, Germany <dbl>, Greece <dbl>,
+#> #   Hong Kong SAR <dbl>, Hungary <dbl>, Iceland <dbl>, India <dbl>,
 #> #   Indonesia <dbl>, Ireland <dbl>, Israel <dbl>, Italy <dbl>, Japan <dbl>,
 #> #   Korea <dbl>, Latvia <dbl>, Lithuania <dbl>, Luxembourg <dbl>,
-#> #   Malaysia <dbl>, Malta <dbl>, Mexico <dbl>, Netherlands <dbl>, `New
-#> #   Zealand` <dbl>, Norway <dbl>, Peru <dbl>, Philippines <dbl>, Poland <dbl>,
-#> #   Portugal <dbl>, Romania <dbl>, Russia <dbl>, `Saudi Arabia` <dbl>,
-#> #   Singapore <dbl>, Slovakia <dbl>, Slovenia <dbl>, `South Africa` <dbl>,
-#> #   Spain <dbl>, Sweden <dbl>, Switzerland <dbl>, Thailand <dbl>, Turkey <dbl>,
-#> #   `United Arab Emirates` <dbl>, `United Kingdom` <dbl>, `United States` <dbl>
+#> #   Malaysia <dbl>, Malta <dbl>, Mexico <dbl>, Netherlands <dbl>,
+#> #   New Zealand <dbl>, Norway <dbl>, Peru <dbl>, Philippines <dbl>,
+#> #   Poland <dbl>, Portugal <dbl>, Romania <dbl>, Russia <dbl>,
+#> #   Saudi Arabia <dbl>, Singapore <dbl>, Slovakia <dbl>, Slovenia <dbl>,
+#> #   South Africa <dbl>, Spain <dbl>, Sweden <dbl>, Switzerland <dbl>,
+#> #   Thailand <dbl>, Turkey <dbl>, United Arab Emirates <dbl>,
+#> #   United Kingdom <dbl>, United States <dbl>
 
 class(eer)
 #> [1] "tbl_df"     "tbl"        "data.frame"
@@ -226,7 +226,7 @@ Let us see the differences year-over-year.
 ``` r
 eer_ts %>% 
   tq_diff(n = 12) %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
   filter(symbol == "reer") %>% 
   filter(area %in% c("Japan", "Euro area", "United States")) %>% 
   ggplot(aes(x = date, y = value, color = area)) +
@@ -248,7 +248,7 @@ Let us see 6 month moving average movements.
 ``` r
 eer_ts %>% 
   tq_ma(n = 6) %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
   filter(symbol == "reer") %>% 
   filter(area %in% c("Japan", "Euro area", "United States")) %>% 
   ggplot(aes(x = date, y = value, color = area)) +
@@ -270,7 +270,7 @@ Let us see year-over-year growth rates, percents.
 ``` r
 eer_ts %>% 
   tq_gr(n = 12) %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
   filter(symbol == "reer") %>% 
   filter(area %in% c("Japan", "Euro area", "United States")) %>% 
   ggplot(aes(x = date, y = value, color = area)) +
@@ -291,7 +291,7 @@ You can convert from “month” to “quarter”.
 
 ``` r
 eer_q <- eer_ts %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
   group_by(symbol, area) %>% 
   index_by(quarter = yearquarter(date)) %>% 
   summarize(value = mean(value))
@@ -320,7 +320,7 @@ package](https://www.rdocumentation.org/packages/seasonal/versions/1.7.0).
 
 ``` r
 greece <- eer_ts %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
   filter(symbol == "deflator", area == "Greece") %>% 
   mutate(symbol = "original")
 
@@ -396,8 +396,8 @@ tq_range <- cal_factory(
 
 eer_ts %>% 
   tq_range() %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
-  pivot_wider(names_from = date, values_from = value) %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
+  pivot_wider(names_from = date) %>% 
   mutate(range = max - min) %>% 
   filter(symbol == "deflator") %>% 
   arrange(desc(range))
@@ -444,21 +444,21 @@ tq_acf <- cal_factory(
 defl_gr1 %>% 
   tq_acf() %>% 
   filter(date == "acf12") %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value") %>% 
+  pivot_longer(!c(date, symbol), names_to = "area") %>% 
   arrange(desc(value))
 #> # A tibble: 60 x 4
 #>    date  symbol   area                 value
 #>    <chr> <chr>    <chr>          <dbl[,1,1]>
-#>  1 acf12 deflator Greece               0.891
-#>  2 acf12 deflator Luxembourg           0.831
-#>  3 acf12 deflator Spain                0.802
-#>  4 acf12 deflator Euro area            0.779
-#>  5 acf12 deflator Netherlands          0.744
-#>  6 acf12 deflator Portugal             0.714
-#>  7 acf12 deflator Germany              0.672
-#>  8 acf12 deflator Czech Republic       0.667
-#>  9 acf12 deflator France               0.667
-#> 10 acf12 deflator Colombia             0.655
+#>  1 acf12 deflator Greece             0.891 …
+#>  2 acf12 deflator Luxembourg         0.831 …
+#>  3 acf12 deflator Spain              0.802 …
+#>  4 acf12 deflator Euro area          0.779 …
+#>  5 acf12 deflator Netherlands        0.744 …
+#>  6 acf12 deflator Portugal           0.714 …
+#>  7 acf12 deflator Germany            0.672 …
+#>  8 acf12 deflator Czech Republic     0.667 …
+#>  9 acf12 deflator France             0.667 …
+#> 10 acf12 deflator Colombia           0.655 …
 #> # … with 50 more rows
 ```
 
@@ -497,20 +497,20 @@ choose, instead consider to spread to wide format.
 ``` r
 system.time(tq_ma(eer_ts, n = 3))
 #>    user  system elapsed 
-#>   0.248   0.000   0.248
+#>   0.246   0.001   0.247
 system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   0.472   0.000   0.471
+#>   0.465   0.003   0.469
 
 eer_ts_long <- eer_ts %>% 
-  pivot_longer(!c(date, symbol), names_to = "area", values_to = "value")
+  pivot_longer(!c(date, symbol), names_to = "area")
 
 system.time(tq_ma(eer_ts_long, n = 3))
 #>    user  system elapsed 
-#>   0.763   0.003   0.768
+#>   0.815   0.001   0.816
 system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))
 #>    user  system elapsed 
-#>   1.176   0.001   1.177
+#>   1.132   0.003   1.136
 ```
 
 ## cal\_factory\_ts: function factory for calculation utilizing ts class
