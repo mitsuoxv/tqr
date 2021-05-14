@@ -31,10 +31,10 @@ Mitsuo Shiota
         package](#cal_factory_xts-function-factory-for-calculation-utilizing-xts-package)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
 <!-- badges: start -->
 
-[![Travis build
-status](https://travis-ci.org/mitsuoxv/tqr.svg?branch=master)](https://travis-ci.org/mitsuoxv/tqr)
+[![R-CMD-check](https://github.com/mitsuoxv/tqr/workflows/R-CMD-check/badge.svg)](https://github.com/mitsuoxv/tqr/actions)
 <!-- badges: end -->
 
 Updated: 2021-03-21

@@ -33,3 +33,5 @@ Suggests:
     testthat,
     ggplot2
 VignetteBuilder: knitr
+URL: https://github.com/mitsuoxv/tqr
+BugReports: https://github.com/mitsuoxv/tqr/issues
