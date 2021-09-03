@@ -19,7 +19,7 @@ eer_small_ts <- eer_small %>%
 
 # test tq_diff()
 res_diff <- eer_small_ts %>%
-  tq_diff(n = 1)
+  tq_diff(lag = 1)
 
 test_that("tq_diff: number of NA's", {
   expect_equal(res_diff$area1 %>% is.na() %>% sum(), 2)

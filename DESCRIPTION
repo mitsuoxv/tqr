@@ -1,11 +1,11 @@
 Package: tqr
 Type: Package
 Title: Add tq_xx functions to tidyquant package to facilitate economic analyses
-Version: 0.0.0.9010
+Version: 0.0.0.9011
 Author: Mitsuo Shiota
 Maintainer: Mitsuo Shiota <mitsuoxv@gmail.com>
 Description: Add utility functions to facilitate economic analyses on
-    time series data to tsibble and tidyquant packages.
+    time series data to tsibble package.
     Added functions are to calculate differences (tq_diff), 
     moving averages (tq_ma), growth rates (tq_gr) and 
     seasonally adjusted values (tq_sa).
@@ -25,7 +25,8 @@ Imports:
     tibble,
     zoo,
     xts,
-    stringr
+    stringr,
+    tidyselect
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,

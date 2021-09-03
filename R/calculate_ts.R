@@ -83,7 +83,7 @@ cal_factory_ts <-
           }
         }
 
-        df_value <- as_tibble(df_value)
+        df_value <- tibble::as_tibble(df_value)
 
         tibble::tibble(!!index_v := fun_idx(df[[index_variable]])) %>%
           dplyr::bind_cols(df_value)
@@ -91,7 +91,7 @@ cal_factory_ts <-
       }
 
       calculated <- df %>%
-        tidyr::nest(data = !any_of(key_variables)) %>%
+        tidyr::nest(data = !tidyselect::any_of(key_variables)) %>%
         dplyr::mutate(data = purrr::map(data, mutate_fun)) %>%
         tidyr::unnest(data)
 
@@ -110,28 +110,3 @@ cal_factory_ts <-
     }
   }
 
-
-#' Calculate seasonally adjusted values.
-#'
-#' @param df_ts A tbl_ts object.
-#' @param ... Parameters of seasonal::seas().
-#' @return A tbl_ts object.
-#' @examples
-#' \dontrun{
-#' tq_sa(df)
-#' }
-#' @export
-tq_sa <- cal_factory_ts(
-  function(num_ts, ...) {
-    num_ts %>%
-      seasonal::seas(...) %>%
-      seasonal::final() %>%
-      as.numeric()
-  },
-  function(idx) {
-    idx
-  },
-  function(itv) {
-    itv
-  }
-)

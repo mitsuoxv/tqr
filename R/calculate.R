@@ -49,7 +49,7 @@ cal_factory <-
       }
 
       calculated <- df %>%
-        tidyr::nest(data = !any_of(key_variables)) %>%
+        tidyr::nest(data = !tidyselect::any_of(key_variables)) %>%
         dplyr::mutate(data = purrr::map(data, mutate_fun)) %>%
         tidyr::unnest(data)
 
@@ -67,102 +67,4 @@ cal_factory <-
       }
     }
 }
-
-
-#' Calculate differences.
-#'
-#' @param df_ts A tbl_ts object.
-#' @param ... Parameter: n, an interval of difference.
-#' @return A tbl_ts object.
-#' @examples
-#' \dontrun{
-#' tq_diff(df_ts) # default n = 1
-#' tq_diff(df_ts, n = 12)
-#' }
-#' @export
-tq_diff <- cal_factory(
-  function(num, n = 1) {
-    num - dplyr::lag(num, n = n)
-  },
-  function(idx) {
-    idx
-  },
-  function(itv) {
-    itv
-  }
-)
-
-
-#' Calculate moving averages.
-#'
-#' @param df_ts A tbl_ts object.
-#' @param ... Parameters: n, width of moving window. na.rm, a parameter for mean. .align, an align position: "right", "left", "center" if odd n, "center-right", "center-left" if even n. .step, a slide step for slider::slide_dbl. .complete, a boolean for slider::slide_dbl.
-#' @return A tbl_ts object.
-#' @examples
-#' \dontrun{
-#' tq_ma(df_ts) # default n = 3, na.rm = FALSE, .align = "right", .step = 1L, .complete = TRUE
-#' tq_ma(df_ts, n = 6, na.rm = TRUE, .align = "center-left")
-#' }
-#' @export
-tq_ma <- cal_factory(
-  function(num, n = 3, na.rm = FALSE, .align = "right", .step = 1L, .complete = TRUE) {
-
-    if (.align == "right") {
-      b = n - 1
-      a = 0
-    } else if (.align == "left") {
-      b = 0
-      a = n - 1
-    } else if ((n %% 2) == 0) {
-      if (.align == "center-left") {
-        b = n / 2 - 1
-        a = n / 2
-      } else if (.align == "center-right") {
-        b = n / 2
-        a = n / 2 - 1
-      } else stop('Set .align either "centre-right", "center-left", "right" or "left"')
-    } else if (.align == "center") {
-      b = floor(n / 2)
-      a = floor(n / 2)
-    } else stop('Set .align either "centre", "right" or "left"')
-
-    slider::slide_dbl(num, mean, na.rm = na.rm,
-                      .before = b, .after = a,
-                      .step = .step, .complete = .complete)
-  },
-  function(idx) {
-    idx
-  },
-  function(itv) {
-    itv
-  }
-)
-
-
-#' Calculate growth rates.
-#'
-#' @param df_ts A tbl_ts object.
-#' @param ... Parameters: n, an interval of difference. annualize, a parameter of power.
-#' @return A tbl_ts object.
-#' @examples
-#' \dontrun{
-#' tq_gr(df_ts) # default n = 12, annualize = 1
-#' tq_gr(df_ts, n = 1, annualize = 4) # annualize quarterly growth rates
-#' }
-#' @export
-tq_gr <- cal_factory(
-  function(num, n = 12, annualize = 1) {
-    if (annualize == 1) {
-      (num / dplyr::lag(num, n = n)) * 100 - 100
-    } else {
-      (num / dplyr::lag(num, n = n))^annualize * 100 - 100
-    }
-  },
-  function(idx) {
-    idx
-  },
-  function(itv) {
-    itv
-  }
-)
 
