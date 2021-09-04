@@ -14,10 +14,9 @@ cal_time_wise <-
       stopifnot(tsibble::is_tsibble(df_ts))
 
       index_v <- tsibble::index(df_ts)
-      key_v <- tsibble::key(df_ts)
 
       df_ts %>%
-        dplyr::group_by(!!!key_v) %>%
+        tsibble::group_by_key() %>%
         dplyr::mutate(dplyr::across(
           tidyselect::vars_select_helpers$where(is.numeric) & !c(!!index_v),
           fun_num, order_by = !!index_v, ...)) %>%

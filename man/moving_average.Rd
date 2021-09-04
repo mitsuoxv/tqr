@@ -19,7 +19,7 @@ moving_average(
 
 \item{n}{A positive integer indicating window width.}
 
-\item{na.rm}{A logical.}
+\item{na.rm}{A logical. TRUE or FALSE (default).}
 
 \item{.align}{A position string:
 \itemize{
@@ -29,9 +29,9 @@ moving_average(
  \item "center-right" or "center-left", if n is even
 }}
 
-\item{.step}{A positive integer indicating the number of elements to shift.}
+\item{.step}{A positive integer indicating the number of elements to shift. 1L (default).}
 
-\item{.complete}{A logical. If TRUE (default), partial computations are not be allowed.}
+\item{.complete}{A logical. If TRUE (default), partial computations are not allowed.}
 
 \item{order_by}{A vector to order by.}
 }

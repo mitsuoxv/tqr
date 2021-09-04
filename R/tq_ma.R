@@ -2,7 +2,7 @@
 #'
 #' @param x A numeric vector.
 #' @param n A positive integer indicating window width.
-#' @param na.rm A logical.
+#' @param na.rm A logical. TRUE or FALSE (default).
 #' @param .align A position string:
 #' \itemize{
 #'  \item "right" (default)
@@ -10,8 +10,8 @@
 #'  \item "center", if n is odd
 #'  \item "center-right" or "center-left", if n is even
 #' }
-#' @param .step A positive integer indicating the number of elements to shift.
-#' @param .complete A logical. If TRUE (default), partial computations are not be allowed.
+#' @param .step A positive integer indicating the number of elements to shift. 1L (default).
+#' @param .complete A logical. If TRUE (default), partial computations are not allowed.
 #' @param order_by A vector to order by.
 #'
 #' @return A numeric vector of the same length as `x`.
