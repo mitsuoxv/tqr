@@ -184,7 +184,8 @@ aus_production %>%
 In the above examples, `sum` function transforms a numeric vector.
 
 tsibble package provides `difference` function, which also transforms a
-time-wise numeric vector. Using it, I can create a new variable “diff”.
+time-wise numeric vector. Using it, you can create a new variable
+“diff”.
 
 ``` r
 aus_arrivals %>% 
@@ -208,7 +209,7 @@ aus_arrivals %>%
 #> # … with 498 more rows
 ```
 
-Or I can transform a existing variable “Arrivals”. I can use
+Or you can transform a existing variable “Arrivals”. You can use
 `difference` function flexibly.
 
 ``` r
@@ -300,11 +301,11 @@ arrange(wrong, year)
 #> # A tsibble: 6 x 3 [1Y]
 #>    year value  diff
 #>   <int> <dbl> <dbl>
-#> 1  2000     0    NA
-#> 2  2001     1   -24
-#> 3  2002     4     4
-#> 4  2003     9     5
-#> 5  2004    16    15
+#> 1  2000     0    -4
+#> 2  2001     1     1
+#> 3  2002     4   -12
+#> 4  2003     9     8
+#> 5  2004    16    NA
 #> 6  2005    25    16
 
 right <- mutate(scrambled, diff = difference(value, order_by = year))
@@ -364,23 +365,28 @@ refer to its document.
 
 ``` r
 aus_livestock %>% 
+  mutate(Count = if_else(row_number() == 4, NA_real_, Count)) %>% 
   group_by_key() %>% 
-  mutate(ma3 = moving_average(Count, n = 3)) %>% 
+  mutate(
+    ma3 = moving_average(Count, n = 3),
+    ma3_na.rm = moving_average(Count, n = 3, na.rm = TRUE),
+    ma3_left = moving_average(Count, n = 3, .align = "left")
+    ) %>% 
   ungroup()
-#> # A tsibble: 29,364 x 5 [1M]
+#> # A tsibble: 29,364 x 7 [1M]
 #> # Key:       Animal, State [54]
-#>       Month Animal                     State                        Count   ma3
-#>       <mth> <fct>                      <fct>                        <dbl> <dbl>
-#>  1 1976 Jul Bulls, bullocks and steers Australian Capital Territory  2300   NA 
-#>  2 1976 Aug Bulls, bullocks and steers Australian Capital Territory  2100   NA 
-#>  3 1976 Sep Bulls, bullocks and steers Australian Capital Territory  2100 2167.
-#>  4 1976 Oct Bulls, bullocks and steers Australian Capital Territory  1900 2033.
-#>  5 1976 Nov Bulls, bullocks and steers Australian Capital Territory  2100 2033.
-#>  6 1976 Dec Bulls, bullocks and steers Australian Capital Territory  1800 1933.
-#>  7 1977 Jan Bulls, bullocks and steers Australian Capital Territory  1800 1900 
-#>  8 1977 Feb Bulls, bullocks and steers Australian Capital Territory  1900 1833.
-#>  9 1977 Mar Bulls, bullocks and steers Australian Capital Territory  2700 2133.
-#> 10 1977 Apr Bulls, bullocks and steers Australian Capital Territory  2300 2300 
+#>       Month Animal                     State      Count   ma3 ma3_na.rm ma3_left
+#>       <mth> <fct>                      <fct>      <dbl> <dbl>     <dbl>    <dbl>
+#>  1 1976 Jul Bulls, bullocks and steers Australia…  2300   NA        NA     2167.
+#>  2 1976 Aug Bulls, bullocks and steers Australia…  2100   NA        NA       NA 
+#>  3 1976 Sep Bulls, bullocks and steers Australia…  2100 2167.     2167.      NA 
+#>  4 1976 Oct Bulls, bullocks and steers Australia…    NA   NA      2100       NA 
+#>  5 1976 Nov Bulls, bullocks and steers Australia…  2100   NA      2100     1900 
+#>  6 1976 Dec Bulls, bullocks and steers Australia…  1800   NA      1950     1833.
+#>  7 1977 Jan Bulls, bullocks and steers Australia…  1800 1900      1900     2133.
+#>  8 1977 Feb Bulls, bullocks and steers Australia…  1900 1833.     1833.    2300 
+#>  9 1977 Mar Bulls, bullocks and steers Australia…  2700 2133.     2133.    2500 
+#> 10 1977 Apr Bulls, bullocks and steers Australia…  2300 2300      2300     2567.
 #> # … with 29,354 more rows
 ```
 
@@ -497,6 +503,42 @@ aus_arrivals %>%
 ``` r
 aus_arrivals %>% 
   tq_sa()
+#> # A tsibble: 508 x 3 [1Q]
+#> # Key:       Origin [4]
+#>    Quarter Origin Arrivals
+#>      <qtr> <chr>     <dbl>
+#>  1 1981 Q1 Japan    12179.
+#>  2 1981 Q2 Japan    12742.
+#>  3 1981 Q3 Japan    13107.
+#>  4 1981 Q4 Japan    14065.
+#>  5 1982 Q1 Japan    14004.
+#>  6 1982 Q2 Japan    14564.
+#>  7 1982 Q3 Japan    14909.
+#>  8 1982 Q4 Japan    15542.
+#>  9 1983 Q1 Japan    16868.
+#> 10 1983 Q2 Japan    16584.
+#> # … with 498 more rows
+```
+
+`tq_sa` function returns right even if the rows are reshuffled, as
+`tq_diff`, `tq_ma` and `tq_gr` functions do.
+
+``` r
+aus_arrivals %>% 
+  slice(sample(nrow(aus_arrivals))) %>% 
+  tq_sa() %>% 
+  arrange(Origin, Quarter)
+#> Warning: Current temporal ordering may yield unexpected results.
+#> ℹ Suggest to sort by `Origin`, `Quarter` first.
+
+#> Warning: Current temporal ordering may yield unexpected results.
+#> ℹ Suggest to sort by `Origin`, `Quarter` first.
+
+#> Warning: Current temporal ordering may yield unexpected results.
+#> ℹ Suggest to sort by `Origin`, `Quarter` first.
+
+#> Warning: Current temporal ordering may yield unexpected results.
+#> ℹ Suggest to sort by `Origin`, `Quarter` first.
 #> # A tsibble: 508 x 3 [1Q]
 #> # Key:       Origin [4]
 #>    Quarter Origin Arrivals

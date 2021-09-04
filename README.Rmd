@@ -55,7 +55,8 @@ This package is only for my own use for now. "You" means "future me".
 
 You can install the development version with:
 
-``` r
+```{r install, eval=FALSE}
+
 remotes::install_github("mitsuoxv/tqr")
 
 ```
@@ -103,7 +104,7 @@ aus_production %>%
 
 In the above examples, `sum` function transforms a numeric vector.
 
-tsibble package provides `difference` function, which also transforms a time-wise numeric vector. Using it, I can create a new variable "diff".
+tsibble package provides `difference` function, which also transforms a time-wise numeric vector. Using it, you can create a new variable "diff".
 
 ```{r difference1}
 
@@ -114,7 +115,7 @@ aus_arrivals %>%
 
 ```
 
-Or I can transform a existing variable "Arrivals". I can use `difference` function flexibly.
+Or you can transform a existing variable "Arrivals". You can use `difference` function flexibly.
 
 ```{r difference2}
 
@@ -192,8 +193,13 @@ scrambled %>%
 ```{r moving_average}
 
 aus_livestock %>% 
+  mutate(Count = if_else(row_number() == 4, NA_real_, Count)) %>% 
   group_by_key() %>% 
-  mutate(ma3 = moving_average(Count, n = 3)) %>% 
+  mutate(
+    ma3 = moving_average(Count, n = 3),
+    ma3_na.rm = moving_average(Count, n = 3, na.rm = TRUE),
+    ma3_left = moving_average(Count, n = 3, .align = "left")
+    ) %>% 
   ungroup()
 
 ```
@@ -249,12 +255,22 @@ aus_arrivals %>%
 
 `tq_sa` function transforms "Arrivals" variable in this example.
 
-```{r tq_sa}
+```{r tq_sa1}
 
 aus_arrivals %>% 
   tq_sa()
 
 ```
 
+`tq_sa` function returns right even if the rows are reshuffled, as `tq_diff`, `tq_ma` and `tq_gr` functions do.
+
+```{r tq_sa2}
+
+aus_arrivals %>% 
+  slice(sample(nrow(aus_arrivals))) %>% 
+  tq_sa() %>% 
+  arrange(Origin, Quarter)
+  
+```
 
 EOL
