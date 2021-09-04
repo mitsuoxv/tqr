@@ -29,16 +29,24 @@ Updated: `r Sys.Date()`
 
 When I utilize [`tidyquant` package](https://cran.r-project.org/web/packages/tidyquant/readme/README.html) for economic analyses, I often find myself writing similar functions repeatedly. I also find the idea of time aware dataframe of [`tsibble` package](https://cran.r-project.org/web/packages/tsibble/index.html) may help me deal with time series data more confidently. So I have decided to build this package to facilitate my work.
 
-`tqr` package adds functions:
+As of version 0.0.0.9011, I have added time-wise functions to transform a numeric vector, and a function factory using those time-wise functions, rewritten functions to transform a tsibble using that function factory, and deprecated old function factories.
 
-1. tq_diff: calculate differences
-1. tq_ma: calculate moving averages
-1. tq_gr: calculate growth rates
-1. tq_sa: calculate seasonally adjusted values
-1. cal_factory: function factory for calculation
-1. cal_factory_zoo: function factory for calculation utilizing zoo package
-1. cal_factory_ts: function factory for calculation utilizing ts class
-1. cal_factory_xts: function factory for calculation utilizing xts package
+1. Time-wise functions to transform a numeric vector
+  - moving_average: transform into moving averages
+  - growth_rate: transform into growth rates
+  - season_adjust: transform into seasonally adjusted values
+2. A function factory to produce functions to transform a tsibble
+  - cal_time_wise: produce functions using time_wise vector functions
+3. Functions to transform a tsibble
+  - tq_diff: transform numeric columns into differences
+  - tq_ma: transform numeric columns into moving averages
+  - tq_gr: transform numeric columns into growth rates
+  - tq_sa: transform numeric columns into seasonally adjusted values
+4. Deprecated function factories
+  - cal_factory: produce functions
+  - cal_factory_zoo: produce functions utilizing zoo package
+  - cal_factory_ts: produce functions utilizing ts class
+  - cal_factory_xts: produce functions utilizing xts package
 
 
 ## Installation
@@ -54,351 +62,199 @@ remotes::install_github("mitsuoxv/tqr")
 
 ## Libraries
 
+As I read [Hyndman, R.J., & Athanasopoulos, G. (2021) Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia. OTexts.com/fpp3.](https://otexts.com/fpp3/), I use `fpp3` meta package here.
+
 ```{r setup, message=FALSE}
-library(tidyverse)
-library(tsibble)
+
+library(fpp3)
 library(tqr)
 
 ```
-## Create time aware dataframe of tsibble class
 
-I use monthly effective exchange rate indices of 60 countries, which BIS publishes on [its site](https://www.bis.org/statistics/eer.htm). `symbol` column is "reer" (real effective exchange rate), "neer" (nominal effective exchange rate) or "deflator", which I calculated as "neer" / "reer" * 100. I prepared `eer` as a tibble.
+## Transform a tsibble into lower frequency
 
-```{r read_eer}
-eer
+If you are familiar with tsibble functions, like `index_by` and `group_by_key`, you can convert to lower frequency.
 
-class(eer)
+```{r convert1}
 
-```
+aus_livestock
 
-I transform `eer` from a tibble to a tsibble (`tbl_ts` class) by making clear that `date` is monthly, and by specifying `key` (category of values) and `index` (time pointing column). Once transformed, I can see meta info of a tsibble, like interval.
-
-```{r as_tsibble}
-eer_ts <- eer %>% 
-  mutate(date = yearmonth(date)) %>% 
-  as_tsibble(key = symbol, index = date)
-
-class(eer_ts)
-
-interval(eer_ts)
-
-is_regular(eer_ts)
-
-is_ordered(eer_ts)
+aus_livestock %>% 
+  index_by(Quarter = yearquarter(Month)) %>% 
+  group_by_key() %>% 
+  summarize(Count = sum(Count))
 
 ```
 
-## Insert missing rows, if necessary
+If you are familiar with dplyr and tidyselect functions, you can convert multiple variables at once.
 
-Sometimes data miss some rows. For example, `corrupt_data` lacks "1994 3" and some other rows. This is dangerous, as my functions often use `lag`.
+```{r convert2}
 
-You can check if there are missing rows, and fill missing rows. Please refer to [`tsibble` package vignette "Handle implicit missingness with tsibble"](https://cran.r-project.org/web/packages/tsibble/vignettes/implicit-na.html).
+aus_production
 
-In this case, `eer_ts` does not miss any rows. I can safely apply my functions.
-
-```{r has_gaps}
-has_gaps(eer_ts)
-
-corrupt_data <- eer_ts[c(-3, -256, -900), ]
-
-has_gaps(corrupt_data)
-
-filled_data <- fill_gaps(corrupt_data)
-
-filled_data
-
-has_gaps(filled_data)
-
+aus_production %>% 
+  index_by(Year = year(Quarter)) %>% 
+  summarize(across(!Quarter, sum))
 
 ```
+
+
+## Time-wise functions to transform a numeric vector are useful and flexible
+
+In the above examples, `sum` function transforms a numeric vector.
+
+tsibble package provides `difference` function, which also transforms a time-wise numeric vector. Using it, I can create a new variable "diff".
+
+```{r difference1}
+
+aus_arrivals %>% 
+  group_by_key() %>% 
+  mutate(diff = difference(Arrivals)) %>% 
+  ungroup()
+
+```
+
+Or I can transform a existing variable "Arrivals". I can use `difference` function flexibly.
+
+```{r difference2}
+
+aus_arrivals %>% 
+  group_by_key() %>% 
+  mutate(Arrivals = difference(Arrivals)) %>% 
+  ungroup()
+
+```
+
+## cal_time_wise: function factory to produce a function to transform a tsibble
+
+`cal_time_wise` function is functionized from the last example, and is a function factory. It receives a time-wise function to transform a numeric vector as its first argument, and it returns a function to transform a tsibble.
 
 ## tq_diff: calculate differences
 
-Let us see the differences year-over-year.
+`tq_diff` function is created like below. `tq_ma`, `tq_gr` and `tq_sa` functions are also created by this function factory.
 
-```{r tq_diff, fig.width=8, fig.height=4}
-eer_ts %>% 
-  tq_diff(n = 12) %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  filter(symbol == "reer") %>% 
-  filter(area %in% c("Japan", "Euro area", "United States")) %>% 
-  ggplot(aes(x = date, y = value, color = area)) +
-  geom_hline(yintercept = 0, size = 2, color = "white") +
-  geom_line() +
-  labs(
-    title = "REER, differences year-over-year",
-    x = NULL, y = NULL, color = NULL
-  )
+```{r tq_diff1, eval=FALSE}
 
-```
-
-## tq_ma: calculate moving averages
-
-Let us see 6 month moving average movements.
-
-```{r tq_ma, fig.width=8, fig.height=4}
-eer_ts %>% 
-  tq_ma(n = 6) %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  filter(symbol == "reer") %>% 
-  filter(area %in% c("Japan", "Euro area", "United States")) %>% 
-  ggplot(aes(x = date, y = value, color = area)) +
-  geom_hline(yintercept = 100, size = 2, color = "white") +
-  geom_line() +
-  labs(
-    title = "REER, 6 month moving averages",
-    x = NULL, y = NULL, color = NULL
-  )
-
-```
-
-## tq_gr: calculate growth rates
-
-Let us see year-over-year growth rates, percents.
-
-```{r tq_gr, fig.width=8, fig.height=4}
-eer_ts %>% 
-  tq_gr(n = 12) %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  filter(symbol == "reer") %>% 
-  filter(area %in% c("Japan", "Euro area", "United States")) %>% 
-  ggplot(aes(x = date, y = value, color = area)) +
-  geom_hline(yintercept = 0, size = 2, color = "white") +
-  geom_line() +
-  labs(
-    title = "REER, year-over-year growth rates",
-    x = NULL, y = NULL, color = NULL
-  )
-
-```
-
-## Convert to lower frequency
-
-You can convert from "month" to "quarter".
-
-```{r convert_freq, fig.width=8, fig.height=4}
-eer_q <- eer_ts %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  group_by(symbol, area) %>% 
-  index_by(quarter = yearquarter(date)) %>% 
-  summarize(value = mean(value))
-
-eer_q %>% 
-  filter(symbol == "reer") %>% 
-  filter(area %in% c("Japan", "Euro area", "United States")) %>% 
-  ggplot(aes(x = quarter, y = value, color = area)) +
-  geom_hline(yintercept = 100, size = 2, color = "white") +
-  geom_line() +
-  labs(
-    title = "REER, quarters",
-    x = NULL, y = NULL, color = NULL
-  )
-
-```
-
-## tq_sa: calculate seasonally adjusted values
-
-Greece has seasonality in deflator which is nominal divided by real effective exchange rate.
-
-Let us get seasonally adjust values. `tq_sa` utilizes [`seasonal` package](https://www.rdocumentation.org/packages/seasonal/versions/1.7.0).
-
-```{r tq_sa, fig.width=8, fig.height=4}
-greece <- eer_ts %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  filter(symbol == "deflator", area == "Greece") %>% 
-  mutate(symbol = "original")
-
-greece_sa <- greece %>% 
-  tq_sa() %>% 
-  mutate(symbol = "seasonally adjusted")
-
-greece %>% 
-  bind_rows(greece_sa) %>% 
-  ggplot(aes(x = date, y = value, color = symbol)) +
-  geom_hline(yintercept = 100, size = 2, color = "white") +
-  geom_line() +
-  labs(
-    title = "Deflator, Greece",
-    x = NULL, y = NULL, color = NULL
-  )
-
-```
-
-## cal_factory: function factory for calculation
-
-`tq_diff`, `tq_ma` and `tq_gr` functions are manufactured by `cal_factory` function. You can manufacture your own function. For example, here I manufacture a function to pick up every 6 month values.
-
-```{r cal_factory, fig.width=8, fig.height=4}
-tq_by6 <- cal_factory(
-  function(num) {
-    num[seq(1, length(num), by = 6)]
-  },
-  function(idx) {
-    idx[seq(1, length(idx), by = 6)]
-  },
-  function(itv) {
-    interval <- itv2list(itv)
-    
-    interval$number <- interval$number * 6
-
-    paste0(interval$number, interval$category)
-  }
+tq_diff <- cal_time_wise(
+  tsibble::difference
 )
 
-greece %>% 
-  tq_by6() %>% 
-  ggplot(aes(x = date, y = value, color = symbol)) +
-  geom_hline(yintercept = 100, size = 2, color = "white") +
-  geom_line() +
-  labs(
-    title = "Deflator, every 6 month, Greece",
-    x = NULL, y = NULL, color = NULL
-  )
+```
+
+The variables, which these created functions transform, are all numeric variables which are not key or index variables.
+
+In the below example, "Month" is the index variable, and "State" and "Industry" are the key variables. "Series ID" is a character vector. So `tq_diff` transforms just "Turnover", a numeric variable.
+
+```{r tq_diff2}
+
+aus_retail %>% 
+  tq_diff()
 
 ```
 
-If you don't mind dirts and are willing to clean up later, you can manufacture a function that makes "date" column non dates. For example, I manufacture a function to calculate range.
+For arguments other than the first one, a tsibble, of `tq_diff` function, look at `tsibble::difference` document. Note that `n` in the previous version of `tq_diff` is changed to `lag`.
 
-```{r dirty_example1}
-tq_range <- cal_factory(
-  function(num) {
-    range(num)
-  },
-  function(idx) {
-    c("min", "max")
-  },
-  function(itv) {
-    "?"
-  }
-)
+## "order_by" argument in time-wise functions to transform a numeric vector
 
-eer_ts %>% 
-  tq_range() %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  pivot_wider(names_from = date) %>% 
-  mutate(range = max - min) %>% 
-  filter(symbol == "deflator") %>% 
-  arrange(desc(range))
+You can find "order_by" argument in `tsibble::difference` document. It is optional in `difference` function.
+
+```{r order_by1}
+
+tsbl <- tsibble(year = 2000:2005, value = (0:5)^2, index = year)
+scrambled <- tsbl %>% slice(sample(nrow(tsbl)))
+
+wrong <- mutate(scrambled, diff = difference(value))
+arrange(wrong, year)
+
+right <- mutate(scrambled, diff = difference(value, order_by = year))
+arrange(right, year)
 
 ```
 
-Another dirty example. I calculate deflators' rates of change from the prior month, look at auto correlation of Algeria, and find high correlation every 12 months, i.e. seasonality. Then, I manufacture `tq_acf` function to get auto correlation values, and find that Greece has the highest seasonality.
+`cal_time_wise` function assigns the index variable in a tsibble to "order_by" argument of `difference` function. As a result, `tq_diff` function returns right even if the rows are reshuffled.
 
-```{r dirty_example2, fig.width=8, fig.height=4}
-defl_gr1 <- eer_ts %>% 
-  filter(symbol == "deflator") %>% 
-  tq_gr(n = 1) %>% 
-  filter(!is.na(Algeria))
+```{r order_by2}
 
-tq_acf <- cal_factory(
-  function(num) {
-    acf(num, lag.max = 24, plot = FALSE)$acf
-  },
-  function(idx) {
-    paste0("acf", 0:24)
-  },
-  function(itv) {
-    "?"
-  }
-)
+tsbl %>% 
+  tq_diff()
 
-defl_gr1 %>% 
-  tq_acf() %>% 
-  filter(date == "acf12") %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  arrange(desc(value))
-
+scrambled %>% 
+  tq_diff() %>% 
+  arrange(year)
 
 ```
 
-## cal_factory_zoo: function factory for calculation utilizing zoo package
 
-You can utilize functions in zoo package in `cal_factory_zoo`. Here, for example, I utilize `zoo::rollmean`, and manufacture `tq_rollmean`, which has the same functionality of `tq_ma`. Although the output is not exactly the same due to floating point calculations, you can consider it as the same with `near` tolerance.
+## moving_average and tq_ma: calculate moving averages
 
-```{r cal_factory_zoo}
-tq_rollmean <- cal_factory_zoo(
-  function(num, ...) {
-    zoo::rollmean(num, ...)
-  },
-  function(idx) idx,
-  function(itv) itv
-)
+`moving_average` function calculates moving averages using `slider` package. "n" specifies the window width. "order_by" is optional, and works in the same way as in `difference` function. For other arguments, refer to its document.
 
-all_equal(
-   tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)[, "date"],
-   tq_ma(eer_ts, n = 3)[, "date"]
-)
+```{r moving_average}
 
-near(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)$Algeria,
-     tq_ma(eer_ts, n = 3)$Algeria) %>%
-  all(na.rm = TRUE)
-
+aus_livestock %>% 
+  group_by_key() %>% 
+  mutate(ma3 = moving_average(Count, n = 3)) %>% 
+  ungroup()
 
 ```
 
-Speed is comparable. If you need speed, don't mind which function to choose, instead consider to spread to wide format.
+`tq_ma` function transforms "Count" variable. For arguments other than the first one, a tsibble, look at `moving_average` document.
 
-```{r speed}
-system.time(tq_ma(eer_ts, n = 3))
-system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
+```{r tq_ma}
 
-eer_ts_long <- eer_ts %>% 
-  pivot_longer(!c(date, symbol), names_to = "area")
-
-system.time(tq_ma(eer_ts_long, n = 3))
-system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))
-
+aus_livestock %>% 
+  tq_ma(n = 3)
 
 ```
 
-## cal_factory_ts: function factory for calculation utilizing ts class
 
-`tq_sa` is manufactured by `cal_factory_ts` function. This function factory is only for interval "1Q" (quarterly) or "1M" (monthly). `tq_sa` is the only example for now.
+## growth_rate and tq_gr: calculate growth rates
 
-```{r cal_factory_ts}
-tq_sa <- cal_factory_ts(
-  function(num_ts, ...) {
-    num_ts %>%
-      seasonal::seas(...) %>%
-      seasonal::final() %>%
-      as.numeric()
-  },
-  function(idx) {
-    idx
-  },
-  function(itv) {
-    itv
-  }
-)
+`growth_rate` function calculates growth rates. "n" specifies the lag. "order_by" is optional, and works in the same way as in `difference` function. For other arguments, refer to its document.
 
+```{r growth_rate}
+
+aus_arrivals %>% 
+  group_by_key() %>% 
+  mutate(
+    gr_yoy = growth_rate(Arrivals, n = 4),
+    gr_annualized = growth_rate(Arrivals, n = 1, annualize = 4),
+    gr_yoy_not_pct = growth_rate(Arrivals, n = 4, pct = FALSE)
+    )
 
 ```
 
-## cal_factory_xts: function factory for calculation utilizing xts package
+`tq_gr` function transforms "Arrivals" variable in this example. For arguments other than the first one, a tsibble, look at `growth_rate` document.
 
-`xts::to.period` function can convert to OHLC (Open, High, Low, Close) in lower frequency. If OHLC = TRUE (default), one column expands to four, so you must input long format with only one numeric column. If you set OHLC = FALSE, you can input wide format, and get C (Close).
+```{r tq_gr}
 
-```{r cal_factory_xts}
-tq_to_quarters <- cal_factory_xts(
-  function(num, ...) {
-    xts::to.period(num, period = "quarters", indexAt = "last", ...)
-  },
-  function(idx) {
-    idx
-  },
-  function(itv) {
-    "1Q"
-  }
-)
-
-eer_ts %>% 
-  select(date, symbol, Algeria) %>% 
-  tq_to_quarters()
-
-eer_ts %>% 
-  tq_to_quarters(OHLC = FALSE)
-
+aus_arrivals %>% 
+  tq_gr(n = 4)
 
 ```
+
+
+## season_adjust and tq_sa: calculate seasonally adjusted values
+
+`season_adjust` function calculates seasonally adjusted values using `season` package. It requires not just "x" argument, a numeric vector, but also "order_by" argument, a time vector. For other arguments, refer to `season` document.
+
+```{r season_adjust}
+
+aus_arrivals %>% 
+  group_by_key() %>% 
+  mutate(sa = season_adjust(Arrivals, Quarter)) %>% 
+  ungroup()
+
+```
+
+`tq_sa` function transforms "Arrivals" variable in this example.
+
+```{r tq_sa}
+
+aus_arrivals %>% 
+  tq_sa()
+
+```
+
 
 EOL

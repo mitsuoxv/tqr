@@ -7,37 +7,32 @@ Mitsuo Shiota
     tidyquant](#tqr-add-on-to-tsibble-inspired-by-tidyquant)
     -   [Installation](#installation)
     -   [Libraries](#libraries)
-    -   [Create time aware dataframe of tsibble
-        class](#create-time-aware-dataframe-of-tsibble-class)
-    -   [Insert missing rows, if
-        necessary](#insert-missing-rows-if-necessary)
+    -   [Transform a tsibble into lower
+        frequency](#transform-a-tsibble-into-lower-frequency)
+    -   [Time-wise functions to transform a numeric vector are useful
+        and
+        flexible](#time-wise-functions-to-transform-a-numeric-vector-are-useful-and-flexible)
+    -   [cal\_time\_wise: function factory to produce a function to
+        transform a
+        tsibble](#cal_time_wise-function-factory-to-produce-a-function-to-transform-a-tsibble)
     -   [tq\_diff: calculate
         differences](#tq_diff-calculate-differences)
-    -   [tq\_ma: calculate moving
-        averages](#tq_ma-calculate-moving-averages)
-    -   [tq\_gr: calculate growth rates](#tq_gr-calculate-growth-rates)
-    -   [Convert to lower frequency](#convert-to-lower-frequency)
-    -   [tq\_sa: calculate seasonally adjusted
-        values](#tq_sa-calculate-seasonally-adjusted-values)
-    -   [cal\_factory: function factory for
-        calculation](#cal_factory-function-factory-for-calculation)
-    -   [cal\_factory\_zoo: function factory for calculation utilizing
-        zoo
-        package](#cal_factory_zoo-function-factory-for-calculation-utilizing-zoo-package)
-    -   [cal\_factory\_ts: function factory for calculation utilizing ts
-        class](#cal_factory_ts-function-factory-for-calculation-utilizing-ts-class)
-    -   [cal\_factory\_xts: function factory for calculation utilizing
-        xts
-        package](#cal_factory_xts-function-factory-for-calculation-utilizing-xts-package)
-
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+    -   [“order\_by” argument in time-wise functions to transform a
+        numeric
+        vector](#order_by-argument-in-time-wise-functions-to-transform-a-numeric-vector)
+    -   [moving\_average and tq\_ma: calculate moving
+        averages](#moving_average-and-tq_ma-calculate-moving-averages)
+    -   [growth\_rate and tq\_gr: calculate growth
+        rates](#growth_rate-and-tq_gr-calculate-growth-rates)
+    -   [season\_adjust and tq\_sa: calculate seasonally adjusted
+        values](#season_adjust-and-tq_sa-calculate-seasonally-adjusted-values)
 
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/mitsuoxv/tqr/workflows/R-CMD-check/badge.svg)](https://github.com/mitsuoxv/tqr/actions)
 <!-- badges: end -->
 
-Updated: 2021-03-21
+Updated: 2021-09-04
 
 # tqr: add-on to tsibble, inspired by tidyquant
 
@@ -49,19 +44,34 @@ package](https://cran.r-project.org/web/packages/tsibble/index.html) may
 help me deal with time series data more confidently. So I have decided
 to build this package to facilitate my work.
 
-`tqr` package adds functions:
+As of version 0.0.0.9011, I have added time-wise functions to transform
+a numeric vector, and a function factory using those time-wise
+functions, rewritten functions to transform a tsibble using that
+function factory, and deprecated old function factories.
 
-1.  tq\_diff: calculate differences
-2.  tq\_ma: calculate moving averages
-3.  tq\_gr: calculate growth rates
-4.  tq\_sa: calculate seasonally adjusted values
-5.  cal\_factory: function factory for calculation
-6.  cal\_factory\_zoo: function factory for calculation utilizing zoo
-    package
-7.  cal\_factory\_ts: function factory for calculation utilizing ts
-    class
-8.  cal\_factory\_xts: function factory for calculation utilizing xts
-    package
+1.  Time-wise functions to transform a numeric vector
+
+-   moving\_average: transform into moving averages
+-   growth\_rate: transform into growth rates
+-   season\_adjust: transform into seasonally adjusted values
+
+2.  A function factory to produce functions to transform a tsibble
+
+-   cal\_time\_wise: produce functions using time\_wise vector functions
+
+3.  Functions to transform a tsibble
+
+-   tq\_diff: transform numeric columns into differences
+-   tq\_ma: transform numeric columns into moving averages
+-   tq\_gr: transform numeric columns into growth rates
+-   tq\_sa: transform numeric columns into seasonally adjusted values
+
+4.  Deprecated function factories
+
+-   cal\_factory: produce functions
+-   cal\_factory\_zoo: produce functions utilizing zoo package
+-   cal\_factory\_ts: produce functions utilizing ts class
+-   cal\_factory\_xts: produce functions utilizing xts package
 
 ## Installation
 
@@ -75,535 +85,433 @@ remotes::install_github("mitsuoxv/tqr")
 
 ## Libraries
 
+As I read [Hyndman, R.J., & Athanasopoulos, G. (2021) Forecasting:
+principles and practice, 3rd edition, OTexts: Melbourne, Australia.
+OTexts.com/fpp3.](https://otexts.com/fpp3/), I use `fpp3` meta package
+here.
+
 ``` r
-library(tidyverse)
-library(tsibble)
+library(fpp3)
 library(tqr)
 ```
 
-## Create time aware dataframe of tsibble class
+## Transform a tsibble into lower frequency
 
-I use monthly effective exchange rate indices of 60 countries, which BIS
-publishes on [its site](https://www.bis.org/statistics/eer.htm).
-`symbol` column is “reer” (real effective exchange rate), “neer”
-(nominal effective exchange rate) or “deflator”, which I calculated as
-“neer” / “reer” \* 100. I prepared `eer` as a tibble.
+If you are familiar with tsibble functions, like `index_by` and
+`group_by_key`, you can convert to lower frequency.
 
 ``` r
-eer
-#> # A tibble: 948 x 62
-#>    date       symbol Algeria Argentina Australia Austria Belgium Brazil Bulgaria
-#>    <date>     <chr>    <dbl>     <dbl>     <dbl>   <dbl>   <dbl>  <dbl>    <dbl>
-#>  1 1994-01-31 defla…    152.      84.2      106.    84.3    88.8  1336.    6021.
-#>  2 1994-02-28 defla…    147.      91.7      107.    84.5    89.2   957.    5858.
-#>  3 1994-03-31 defla…    144.     100.       107.    84.6    89.7   673.    5515.
-#>  4 1994-04-30 defla…    142.     109.       107.    85.1    90.1   474.    4632.
-#>  5 1994-05-31 defla…    135.     119.       108.    85.4    90.3   330.    4350.
-#>  6 1994-06-30 defla…    134.     130.       108.    85.6    90.4   224.    4222.
-#>  7 1994-07-31 defla…    133.     131.       108.    84.8    90.1   211.    4218.
-#>  8 1994-08-31 defla…    129.     132.       108.    84.7    90.3   208.    4038.
-#>  9 1994-09-30 defla…    123.     132.       108.    85.6    90.8   205.    3690.
-#> 10 1994-10-31 defla…    121.     133.       108.    86.2    91.2   201.    3512.
-#> # … with 938 more rows, and 53 more variables: Canada <dbl>, Chile <dbl>,
-#> #   China <dbl>, Chinese Taipei <dbl>, Colombia <dbl>, Croatia <dbl>,
-#> #   Cyprus <dbl>, Czech Republic <dbl>, Denmark <dbl>, Estonia <dbl>,
-#> #   Euro area <dbl>, Finland <dbl>, France <dbl>, Germany <dbl>, Greece <dbl>,
-#> #   Hong Kong SAR <dbl>, Hungary <dbl>, Iceland <dbl>, India <dbl>,
-#> #   Indonesia <dbl>, Ireland <dbl>, Israel <dbl>, Italy <dbl>, Japan <dbl>,
-#> #   Korea <dbl>, Latvia <dbl>, Lithuania <dbl>, Luxembourg <dbl>,
-#> #   Malaysia <dbl>, Malta <dbl>, Mexico <dbl>, Netherlands <dbl>,
-#> #   New Zealand <dbl>, Norway <dbl>, Peru <dbl>, Philippines <dbl>,
-#> #   Poland <dbl>, Portugal <dbl>, Romania <dbl>, Russia <dbl>,
-#> #   Saudi Arabia <dbl>, Singapore <dbl>, Slovakia <dbl>, Slovenia <dbl>,
-#> #   South Africa <dbl>, Spain <dbl>, Sweden <dbl>, Switzerland <dbl>,
-#> #   Thailand <dbl>, Turkey <dbl>, United Arab Emirates <dbl>,
-#> #   United Kingdom <dbl>, United States <dbl>
+aus_livestock
+#> # A tsibble: 29,364 x 4 [1M]
+#> # Key:       Animal, State [54]
+#>       Month Animal                     State                        Count
+#>       <mth> <fct>                      <fct>                        <dbl>
+#>  1 1976 Jul Bulls, bullocks and steers Australian Capital Territory  2300
+#>  2 1976 Aug Bulls, bullocks and steers Australian Capital Territory  2100
+#>  3 1976 Sep Bulls, bullocks and steers Australian Capital Territory  2100
+#>  4 1976 Oct Bulls, bullocks and steers Australian Capital Territory  1900
+#>  5 1976 Nov Bulls, bullocks and steers Australian Capital Territory  2100
+#>  6 1976 Dec Bulls, bullocks and steers Australian Capital Territory  1800
+#>  7 1977 Jan Bulls, bullocks and steers Australian Capital Territory  1800
+#>  8 1977 Feb Bulls, bullocks and steers Australian Capital Territory  1900
+#>  9 1977 Mar Bulls, bullocks and steers Australian Capital Territory  2700
+#> 10 1977 Apr Bulls, bullocks and steers Australian Capital Territory  2300
+#> # … with 29,354 more rows
 
-class(eer)
-#> [1] "tbl_df"     "tbl"        "data.frame"
+aus_livestock %>% 
+  index_by(Quarter = yearquarter(Month)) %>% 
+  group_by_key() %>% 
+  summarize(Count = sum(Count))
+#> # A tsibble: 9,788 x 4 [1Q]
+#> # Key:       Animal, State [54]
+#> # Groups:    Animal [7]
+#>    Animal                     State                        Quarter Count
+#>    <fct>                      <fct>                          <qtr> <dbl>
+#>  1 Bulls, bullocks and steers Australian Capital Territory 1976 Q3  6500
+#>  2 Bulls, bullocks and steers Australian Capital Territory 1976 Q4  5800
+#>  3 Bulls, bullocks and steers Australian Capital Territory 1977 Q1  6400
+#>  4 Bulls, bullocks and steers Australian Capital Territory 1977 Q2  7700
+#>  5 Bulls, bullocks and steers Australian Capital Territory 1977 Q3  7000
+#>  6 Bulls, bullocks and steers Australian Capital Territory 1977 Q4  6900
+#>  7 Bulls, bullocks and steers Australian Capital Territory 1978 Q1  7800
+#>  8 Bulls, bullocks and steers Australian Capital Territory 1978 Q2  8500
+#>  9 Bulls, bullocks and steers Australian Capital Territory 1978 Q3  7900
+#> 10 Bulls, bullocks and steers Australian Capital Territory 1978 Q4  7900
+#> # … with 9,778 more rows
 ```
 
-I transform `eer` from a tibble to a tsibble (`tbl_ts` class) by making
-clear that `date` is monthly, and by specifying `key` (category of
-values) and `index` (time pointing column). Once transformed, I can see
-meta info of a tsibble, like interval.
+If you are familiar with dplyr and tidyselect functions, you can convert
+multiple variables at once.
 
 ``` r
-eer_ts <- eer %>% 
-  mutate(date = yearmonth(date)) %>% 
-  as_tsibble(key = symbol, index = date)
+aus_production
+#> # A tsibble: 218 x 7 [1Q]
+#>    Quarter  Beer Tobacco Bricks Cement Electricity   Gas
+#>      <qtr> <dbl>   <dbl>  <dbl>  <dbl>       <dbl> <dbl>
+#>  1 1956 Q1   284    5225    189    465        3923     5
+#>  2 1956 Q2   213    5178    204    532        4436     6
+#>  3 1956 Q3   227    5297    208    561        4806     7
+#>  4 1956 Q4   308    5681    197    570        4418     6
+#>  5 1957 Q1   262    5577    187    529        4339     5
+#>  6 1957 Q2   228    5651    214    604        4811     7
+#>  7 1957 Q3   236    5317    227    603        5259     7
+#>  8 1957 Q4   320    6152    222    582        4735     6
+#>  9 1958 Q1   272    5758    199    554        4608     5
+#> 10 1958 Q2   233    5641    229    620        5196     7
+#> # … with 208 more rows
 
-class(eer_ts)
-#> [1] "tbl_ts"     "tbl_df"     "tbl"        "data.frame"
-
-interval(eer_ts)
-#> <interval[1]>
-#> [1] 1M
-
-is_regular(eer_ts)
-#> [1] TRUE
-
-is_ordered(eer_ts)
-#> [1] TRUE
+aus_production %>% 
+  index_by(Year = year(Quarter)) %>% 
+  summarize(across(!Quarter, sum))
+#> # A tsibble: 55 x 7 [1Y]
+#>     Year  Beer Tobacco Bricks Cement Electricity   Gas
+#>    <dbl> <dbl>   <dbl>  <dbl>  <dbl>       <dbl> <dbl>
+#>  1  1956  1032   21381    798   2128       17583    24
+#>  2  1957  1046   22697    850   2318       19144    25
+#>  3  1958  1055   23466    911   2457       20390    26
+#>  4  1959  1052   23919    981   2617       22176    26
+#>  5  1960  1084   24328   1077   2800       24240    29
+#>  6  1961  1124   25088    995   2859       25204    27
+#>  7  1962  1145   25117   1027   2934       27659    29
+#>  8  1963  1190   25541   1115   3121       30639    30
+#>  9  1964  1256   26396   1310   3625       34226    30
+#> 10  1965  1311   26346   1364   3812       37056    30
+#> # … with 45 more rows
 ```
 
-## Insert missing rows, if necessary
+## Time-wise functions to transform a numeric vector are useful and flexible
 
-Sometimes data miss some rows. For example, `corrupt_data` lacks “1994
-3” and some other rows. This is dangerous, as my functions often use
-`lag`.
+In the above examples, `sum` function transforms a numeric vector.
 
-You can check if there are missing rows, and fill missing rows. Please
-refer to [`tsibble` package vignette “Handle implicit missingness with
-tsibble”](https://cran.r-project.org/web/packages/tsibble/vignettes/implicit-na.html).
-
-In this case, `eer_ts` does not miss any rows. I can safely apply my
-functions.
+tsibble package provides `difference` function, which also transforms a
+time-wise numeric vector. Using it, I can create a new variable “diff”.
 
 ``` r
-has_gaps(eer_ts)
-#> # A tibble: 3 x 2
-#>   symbol   .gaps
-#>   <chr>    <lgl>
-#> 1 deflator FALSE
-#> 2 neer     FALSE
-#> 3 reer     FALSE
-
-corrupt_data <- eer_ts[c(-3, -256, -900), ]
-
-has_gaps(corrupt_data)
-#> # A tibble: 3 x 2
-#>   symbol   .gaps
-#>   <chr>    <lgl>
-#> 1 deflator TRUE 
-#> 2 neer     FALSE
-#> 3 reer     TRUE
-
-filled_data <- fill_gaps(corrupt_data)
-
-filled_data
-#> # A tsibble: 948 x 62 [1M]
-#> # Key:       symbol [3]
-#>        date symbol Algeria Argentina Australia Austria Belgium Brazil Bulgaria
-#>       <mth> <chr>    <dbl>     <dbl>     <dbl>   <dbl>   <dbl>  <dbl>    <dbl>
-#>  1 1994 Jan defla…    152.      84.2      106.    84.3    88.8  1336.    6021.
-#>  2 1994 Feb defla…    147.      91.7      107.    84.5    89.2   957.    5858.
-#>  3 1994 Mar defla…     NA       NA         NA     NA      NA      NA       NA 
-#>  4 1994 Apr defla…    142.     109.       107.    85.1    90.1   474.    4632.
-#>  5 1994 May defla…    135.     119.       108.    85.4    90.3   330.    4350.
-#>  6 1994 Jun defla…    134.     130.       108.    85.6    90.4   224.    4222.
-#>  7 1994 Jul defla…    133.     131.       108.    84.8    90.1   211.    4218.
-#>  8 1994 Aug defla…    129.     132.       108.    84.7    90.3   208.    4038.
-#>  9 1994 Sep defla…    123.     132.       108.    85.6    90.8   205.    3690.
-#> 10 1994 Oct defla…    121.     133.       108.    86.2    91.2   201.    3512.
-#> # … with 938 more rows, and 53 more variables: Canada <dbl>, Chile <dbl>,
-#> #   China <dbl>, `Chinese Taipei` <dbl>, Colombia <dbl>, Croatia <dbl>,
-#> #   Cyprus <dbl>, `Czech Republic` <dbl>, Denmark <dbl>, Estonia <dbl>, `Euro
-#> #   area` <dbl>, Finland <dbl>, France <dbl>, Germany <dbl>, Greece <dbl>,
-#> #   `Hong Kong SAR` <dbl>, Hungary <dbl>, Iceland <dbl>, India <dbl>,
-#> #   Indonesia <dbl>, Ireland <dbl>, Israel <dbl>, Italy <dbl>, Japan <dbl>,
-#> #   Korea <dbl>, Latvia <dbl>, Lithuania <dbl>, Luxembourg <dbl>,
-#> #   Malaysia <dbl>, Malta <dbl>, Mexico <dbl>, Netherlands <dbl>, `New
-#> #   Zealand` <dbl>, Norway <dbl>, Peru <dbl>, Philippines <dbl>, Poland <dbl>,
-#> #   Portugal <dbl>, Romania <dbl>, Russia <dbl>, `Saudi Arabia` <dbl>,
-#> #   Singapore <dbl>, Slovakia <dbl>, Slovenia <dbl>, `South Africa` <dbl>,
-#> #   Spain <dbl>, Sweden <dbl>, Switzerland <dbl>, Thailand <dbl>, Turkey <dbl>,
-#> #   `United Arab Emirates` <dbl>, `United Kingdom` <dbl>, `United States` <dbl>
-
-has_gaps(filled_data)
-#> # A tibble: 3 x 2
-#>   symbol   .gaps
-#>   <chr>    <lgl>
-#> 1 deflator FALSE
-#> 2 neer     FALSE
-#> 3 reer     FALSE
+aus_arrivals %>% 
+  group_by_key() %>% 
+  mutate(diff = difference(Arrivals)) %>% 
+  ungroup()
+#> # A tsibble: 508 x 4 [1Q]
+#> # Key:       Origin [4]
+#>    Quarter Origin Arrivals  diff
+#>      <qtr> <chr>     <int> <int>
+#>  1 1981 Q1 Japan     14763    NA
+#>  2 1981 Q2 Japan      9321 -5442
+#>  3 1981 Q3 Japan     10166   845
+#>  4 1981 Q4 Japan     19509  9343
+#>  5 1982 Q1 Japan     17117 -2392
+#>  6 1982 Q2 Japan     10617 -6500
+#>  7 1982 Q3 Japan     11737  1120
+#>  8 1982 Q4 Japan     20961  9224
+#>  9 1983 Q1 Japan     20671  -290
+#> 10 1983 Q2 Japan     12235 -8436
+#> # … with 498 more rows
 ```
+
+Or I can transform a existing variable “Arrivals”. I can use
+`difference` function flexibly.
+
+``` r
+aus_arrivals %>% 
+  group_by_key() %>% 
+  mutate(Arrivals = difference(Arrivals)) %>% 
+  ungroup()
+#> # A tsibble: 508 x 3 [1Q]
+#> # Key:       Origin [4]
+#>    Quarter Origin Arrivals
+#>      <qtr> <chr>     <int>
+#>  1 1981 Q1 Japan        NA
+#>  2 1981 Q2 Japan     -5442
+#>  3 1981 Q3 Japan       845
+#>  4 1981 Q4 Japan      9343
+#>  5 1982 Q1 Japan     -2392
+#>  6 1982 Q2 Japan     -6500
+#>  7 1982 Q3 Japan      1120
+#>  8 1982 Q4 Japan      9224
+#>  9 1983 Q1 Japan      -290
+#> 10 1983 Q2 Japan     -8436
+#> # … with 498 more rows
+```
+
+## cal\_time\_wise: function factory to produce a function to transform a tsibble
+
+`cal_time_wise` function is functionized from the last example, and is a
+function factory. It receives a time-wise function to transform a
+numeric vector as its first argument, and it returns a function to
+transform a tsibble.
 
 ## tq\_diff: calculate differences
 
-Let us see the differences year-over-year.
+`tq_diff` function is created like below. `tq_ma`, `tq_gr` and `tq_sa`
+functions are also created by this function factory.
 
 ``` r
-eer_ts %>% 
-  tq_diff(n = 12) %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  filter(symbol == "reer") %>% 
-  filter(area %in% c("Japan", "Euro area", "United States")) %>% 
-  ggplot(aes(x = date, y = value, color = area)) +
-  geom_hline(yintercept = 0, size = 2, color = "white") +
-  geom_line() +
-  labs(
-    title = "REER, differences year-over-year",
-    x = NULL, y = NULL, color = NULL
-  )
-#> Warning: Removed 36 row(s) containing missing values (geom_path).
-```
-
-<img src="man/figures/README-tq_diff-1.png" width="100%" />
-
-## tq\_ma: calculate moving averages
-
-Let us see 6 month moving average movements.
-
-``` r
-eer_ts %>% 
-  tq_ma(n = 6) %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  filter(symbol == "reer") %>% 
-  filter(area %in% c("Japan", "Euro area", "United States")) %>% 
-  ggplot(aes(x = date, y = value, color = area)) +
-  geom_hline(yintercept = 100, size = 2, color = "white") +
-  geom_line() +
-  labs(
-    title = "REER, 6 month moving averages",
-    x = NULL, y = NULL, color = NULL
-  )
-#> Warning: Removed 15 row(s) containing missing values (geom_path).
-```
-
-<img src="man/figures/README-tq_ma-1.png" width="100%" />
-
-## tq\_gr: calculate growth rates
-
-Let us see year-over-year growth rates, percents.
-
-``` r
-eer_ts %>% 
-  tq_gr(n = 12) %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  filter(symbol == "reer") %>% 
-  filter(area %in% c("Japan", "Euro area", "United States")) %>% 
-  ggplot(aes(x = date, y = value, color = area)) +
-  geom_hline(yintercept = 0, size = 2, color = "white") +
-  geom_line() +
-  labs(
-    title = "REER, year-over-year growth rates",
-    x = NULL, y = NULL, color = NULL
-  )
-#> Warning: Removed 36 row(s) containing missing values (geom_path).
-```
-
-<img src="man/figures/README-tq_gr-1.png" width="100%" />
-
-## Convert to lower frequency
-
-You can convert from “month” to “quarter”.
-
-``` r
-eer_q <- eer_ts %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  group_by(symbol, area) %>% 
-  index_by(quarter = yearquarter(date)) %>% 
-  summarize(value = mean(value))
-
-eer_q %>% 
-  filter(symbol == "reer") %>% 
-  filter(area %in% c("Japan", "Euro area", "United States")) %>% 
-  ggplot(aes(x = quarter, y = value, color = area)) +
-  geom_hline(yintercept = 100, size = 2, color = "white") +
-  geom_line() +
-  labs(
-    title = "REER, quarters",
-    x = NULL, y = NULL, color = NULL
-  )
-```
-
-<img src="man/figures/README-convert_freq-1.png" width="100%" />
-
-## tq\_sa: calculate seasonally adjusted values
-
-Greece has seasonality in deflator which is nominal divided by real
-effective exchange rate.
-
-Let us get seasonally adjust values. `tq_sa` utilizes [`seasonal`
-package](https://www.rdocumentation.org/packages/seasonal/versions/1.7.0).
-
-``` r
-greece <- eer_ts %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  filter(symbol == "deflator", area == "Greece") %>% 
-  mutate(symbol = "original")
-
-greece_sa <- greece %>% 
-  tq_sa() %>% 
-  mutate(symbol = "seasonally adjusted")
-
-greece %>% 
-  bind_rows(greece_sa) %>% 
-  ggplot(aes(x = date, y = value, color = symbol)) +
-  geom_hline(yintercept = 100, size = 2, color = "white") +
-  geom_line() +
-  labs(
-    title = "Deflator, Greece",
-    x = NULL, y = NULL, color = NULL
-  )
-```
-
-<img src="man/figures/README-tq_sa-1.png" width="100%" />
-
-## cal\_factory: function factory for calculation
-
-`tq_diff`, `tq_ma` and `tq_gr` functions are manufactured by
-`cal_factory` function. You can manufacture your own function. For
-example, here I manufacture a function to pick up every 6 month values.
-
-``` r
-tq_by6 <- cal_factory(
-  function(num) {
-    num[seq(1, length(num), by = 6)]
-  },
-  function(idx) {
-    idx[seq(1, length(idx), by = 6)]
-  },
-  function(itv) {
-    interval <- itv2list(itv)
-    
-    interval$number <- interval$number * 6
-
-    paste0(interval$number, interval$category)
-  }
-)
-
-greece %>% 
-  tq_by6() %>% 
-  ggplot(aes(x = date, y = value, color = symbol)) +
-  geom_hline(yintercept = 100, size = 2, color = "white") +
-  geom_line() +
-  labs(
-    title = "Deflator, every 6 month, Greece",
-    x = NULL, y = NULL, color = NULL
-  )
-```
-
-<img src="man/figures/README-cal_factory-1.png" width="100%" />
-
-If you don’t mind dirts and are willing to clean up later, you can
-manufacture a function that makes “date” column non dates. For example,
-I manufacture a function to calculate range.
-
-``` r
-tq_range <- cal_factory(
-  function(num) {
-    range(num)
-  },
-  function(idx) {
-    c("min", "max")
-  },
-  function(itv) {
-    "?"
-  }
-)
-
-eer_ts %>% 
-  tq_range() %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  pivot_wider(names_from = date) %>% 
-  mutate(range = max - min) %>% 
-  filter(symbol == "deflator") %>% 
-  arrange(desc(range))
-#> # A tibble: 60 x 5
-#>    symbol   area        min    max  range
-#>    <chr>    <chr>     <dbl>  <dbl>  <dbl>
-#>  1 deflator Turkey     47.2 13053. 13006.
-#>  2 deflator Bulgaria   98.1  6021.  5923.
-#>  3 deflator Russia     65.1  4262.  4197.
-#>  4 deflator Romania    94.6  3329.  3234.
-#>  5 deflator Brazil     80.5  1336.  1256.
-#>  6 deflator Indonesia  77.9   418.   340.
-#>  7 deflator Mexico     83.0   346.   263.
-#>  8 deflator Hungary    95.1   272.   177.
-#>  9 deflator Colombia   88.5   258.   170.
-#> 10 deflator Argentina  16.0   184.   168.
-#> # … with 50 more rows
-```
-
-Another dirty example. I calculate deflators’ rates of change from the
-prior month, look at auto correlation of Algeria, and find high
-correlation every 12 months, i.e. seasonality. Then, I manufacture
-`tq_acf` function to get auto correlation values, and find that Greece
-has the highest seasonality.
-
-``` r
-defl_gr1 <- eer_ts %>% 
-  filter(symbol == "deflator") %>% 
-  tq_gr(n = 1) %>% 
-  filter(!is.na(Algeria))
-
-tq_acf <- cal_factory(
-  function(num) {
-    acf(num, lag.max = 24, plot = FALSE)$acf
-  },
-  function(idx) {
-    paste0("acf", 0:24)
-  },
-  function(itv) {
-    "?"
-  }
-)
-
-defl_gr1 %>% 
-  tq_acf() %>% 
-  filter(date == "acf12") %>% 
-  pivot_longer(!c(date, symbol), names_to = "area") %>% 
-  arrange(desc(value))
-#> # A tibble: 60 x 4
-#>    date  symbol   area                 value
-#>    <chr> <chr>    <chr>          <dbl[,1,1]>
-#>  1 acf12 deflator Greece             0.891 …
-#>  2 acf12 deflator Luxembourg         0.831 …
-#>  3 acf12 deflator Spain              0.802 …
-#>  4 acf12 deflator Euro area          0.779 …
-#>  5 acf12 deflator Netherlands        0.744 …
-#>  6 acf12 deflator Portugal           0.714 …
-#>  7 acf12 deflator Germany            0.672 …
-#>  8 acf12 deflator Czech Republic     0.667 …
-#>  9 acf12 deflator France             0.667 …
-#> 10 acf12 deflator Colombia           0.655 …
-#> # … with 50 more rows
-```
-
-## cal\_factory\_zoo: function factory for calculation utilizing zoo package
-
-You can utilize functions in zoo package in `cal_factory_zoo`. Here, for
-example, I utilize `zoo::rollmean`, and manufacture `tq_rollmean`, which
-has the same functionality of `tq_ma`. Although the output is not
-exactly the same due to floating point calculations, you can consider it
-as the same with `near` tolerance.
-
-``` r
-tq_rollmean <- cal_factory_zoo(
-  function(num, ...) {
-    zoo::rollmean(num, ...)
-  },
-  function(idx) idx,
-  function(itv) itv
-)
-
-all_equal(
-   tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)[, "date"],
-   tq_ma(eer_ts, n = 3)[, "date"]
-)
-#> [1] TRUE
-
-near(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA)$Algeria,
-     tq_ma(eer_ts, n = 3)$Algeria) %>%
-  all(na.rm = TRUE)
-#> [1] TRUE
-```
-
-Speed is comparable. If you need speed, don’t mind which function to
-choose, instead consider to spread to wide format.
-
-``` r
-system.time(tq_ma(eer_ts, n = 3))
-#>    user  system elapsed 
-#>   0.246   0.001   0.247
-system.time(tq_rollmean(eer_ts, k = 3, align = "right", fill = NA))
-#>    user  system elapsed 
-#>   0.465   0.003   0.469
-
-eer_ts_long <- eer_ts %>% 
-  pivot_longer(!c(date, symbol), names_to = "area")
-
-system.time(tq_ma(eer_ts_long, n = 3))
-#>    user  system elapsed 
-#>   0.815   0.001   0.816
-system.time(tq_rollmean(eer_ts_long, k = 3, align = "right", fill = NA))
-#>    user  system elapsed 
-#>   1.132   0.003   1.136
-```
-
-## cal\_factory\_ts: function factory for calculation utilizing ts class
-
-`tq_sa` is manufactured by `cal_factory_ts` function. This function
-factory is only for interval “1Q” (quarterly) or “1M” (monthly). `tq_sa`
-is the only example for now.
-
-``` r
-tq_sa <- cal_factory_ts(
-  function(num_ts, ...) {
-    num_ts %>%
-      seasonal::seas(...) %>%
-      seasonal::final() %>%
-      as.numeric()
-  },
-  function(idx) {
-    idx
-  },
-  function(itv) {
-    itv
-  }
+tq_diff <- cal_time_wise(
+  tsibble::difference
 )
 ```
 
-## cal\_factory\_xts: function factory for calculation utilizing xts package
+The variables, which these created functions transform, are all numeric
+variables which are not key or index variables.
 
-`xts::to.period` function can convert to OHLC (Open, High, Low, Close)
-in lower frequency. If OHLC = TRUE (default), one column expands to
-four, so you must input long format with only one numeric column. If you
-set OHLC = FALSE, you can input wide format, and get C (Close).
+In the below example, “Month” is the index variable, and “State” and
+“Industry” are the key variables. “Series ID” is a character vector. So
+`tq_diff` transforms just “Turnover”, a numeric variable.
 
 ``` r
-tq_to_quarters <- cal_factory_xts(
-  function(num, ...) {
-    xts::to.period(num, period = "quarters", indexAt = "last", ...)
-  },
-  function(idx) {
-    idx
-  },
-  function(itv) {
-    "1Q"
-  }
-)
+aus_retail %>% 
+  tq_diff()
+#> # A tsibble: 64,532 x 5 [1M]
+#> # Key:       State, Industry [152]
+#>    State                        Industry           `Series ID`    Month Turnover
+#>    <chr>                        <chr>              <chr>          <mth>    <dbl>
+#>  1 Australian Capital Territory Cafes, restaurant… A3349849A   1982 Apr   NA    
+#>  2 Australian Capital Territory Cafes, restaurant… A3349849A   1982 May   -1    
+#>  3 Australian Capital Territory Cafes, restaurant… A3349849A   1982 Jun    0.200
+#>  4 Australian Capital Territory Cafes, restaurant… A3349849A   1982 Jul    0.4  
+#>  5 Australian Capital Territory Cafes, restaurant… A3349849A   1982 Aug   -0.4  
+#>  6 Australian Capital Territory Cafes, restaurant… A3349849A   1982 Sep    0.6  
+#>  7 Australian Capital Territory Cafes, restaurant… A3349849A   1982 Oct    0.600
+#>  8 Australian Capital Territory Cafes, restaurant… A3349849A   1982 Nov    0.600
+#>  9 Australian Capital Territory Cafes, restaurant… A3349849A   1982 Dec    1.5  
+#> 10 Australian Capital Territory Cafes, restaurant… A3349849A   1983 Jan   -3.1  
+#> # … with 64,522 more rows
+```
 
-eer_ts %>% 
-  select(date, symbol, Algeria) %>% 
-  tq_to_quarters()
-#> # A tsibble: 318 x 6 [1Q]
-#> # Key:       symbol [3]
-#>    symbol   num.Open num.High num.Low num.Close    date
-#>    <chr>       <dbl>    <dbl>   <dbl>     <dbl>   <qtr>
-#>  1 deflator    152.     152.    144.      144.  1994 Q1
-#>  2 deflator    142.     142.    134.      134.  1994 Q2
-#>  3 deflator    133.     133.    123.      123.  1994 Q3
-#>  4 deflator    121.     122.    121.      121.  1994 Q4
-#>  5 deflator    114.     114.    113.      113.  1995 Q1
-#>  6 deflator    114.     114.    109.      109.  1995 Q2
-#>  7 deflator    111.     111.    106.      106.  1995 Q3
-#>  8 deflator    106.     106.    104.      104.  1995 Q4
-#>  9 deflator    100.     100.     98.5      98.5 1996 Q1
-#> 10 deflator     98.9     98.9    95.1      95.1 1996 Q2
-#> # … with 308 more rows
+For arguments other than the first one, a tsibble, of `tq_diff`
+function, look at `tsibble::difference` document. Note that `n` in the
+previous version of `tq_diff` is changed to `lag`.
 
-eer_ts %>% 
-  tq_to_quarters(OHLC = FALSE)
-#> # A tsibble: 318 x 62 [1Q]
-#> # Key:       symbol [3]
-#>       date symbol Algeria Argentina Australia Austria Belgium Brazil Bulgaria
-#>      <qtr> <chr>    <dbl>     <dbl>     <dbl>   <dbl>   <dbl>  <dbl>    <dbl>
-#>  1 1994 Q1 defla…   144.       100.      107.    84.6    89.7   673.    5515.
-#>  2 1994 Q2 defla…   134.       130.      108.    85.6    90.4   224.    4222.
-#>  3 1994 Q3 defla…   123.       132.      108.    85.6    90.8   205.    3690.
-#>  4 1994 Q4 defla…   121.       134.      108.    87.0    91.7   193.    3273.
-#>  5 1995 Q1 defla…   113.       136.      107.    87.2    92.6   188.    3055.
-#>  6 1995 Q2 defla…   109.       140.      107.    87.8    93.2   177.    3074.
-#>  7 1995 Q3 defla…   106.       141.      106.    88.2    93.5   171.    2951.
-#>  8 1995 Q4 defla…   104.       143.      106.    89.1    93.8   164.    2790.
-#>  9 1996 Q1 defla…    98.5      147.      107.    89.4    94.0   162.    2681.
-#> 10 1996 Q2 defla…    95.1      150.      107.    89.8    94.6   157.    1997.
-#> # … with 308 more rows, and 53 more variables: Canada <dbl>, Chile <dbl>,
-#> #   China <dbl>, `Chinese Taipei` <dbl>, Colombia <dbl>, Croatia <dbl>,
-#> #   Cyprus <dbl>, `Czech Republic` <dbl>, Denmark <dbl>, Estonia <dbl>, `Euro
-#> #   area` <dbl>, Finland <dbl>, France <dbl>, Germany <dbl>, Greece <dbl>,
-#> #   `Hong Kong SAR` <dbl>, Hungary <dbl>, Iceland <dbl>, India <dbl>,
-#> #   Indonesia <dbl>, Ireland <dbl>, Israel <dbl>, Italy <dbl>, Japan <dbl>,
-#> #   Korea <dbl>, Latvia <dbl>, Lithuania <dbl>, Luxembourg <dbl>,
-#> #   Malaysia <dbl>, Malta <dbl>, Mexico <dbl>, Netherlands <dbl>, `New
-#> #   Zealand` <dbl>, Norway <dbl>, Peru <dbl>, Philippines <dbl>, Poland <dbl>,
-#> #   Portugal <dbl>, Romania <dbl>, Russia <dbl>, `Saudi Arabia` <dbl>,
-#> #   Singapore <dbl>, Slovakia <dbl>, Slovenia <dbl>, `South Africa` <dbl>,
-#> #   Spain <dbl>, Sweden <dbl>, Switzerland <dbl>, Thailand <dbl>, Turkey <dbl>,
-#> #   `United Arab Emirates` <dbl>, `United Kingdom` <dbl>, `United States` <dbl>
+## “order\_by” argument in time-wise functions to transform a numeric vector
+
+You can find “order\_by” argument in `tsibble::difference` document. It
+is optional in `difference` function.
+
+``` r
+tsbl <- tsibble(year = 2000:2005, value = (0:5)^2, index = year)
+scrambled <- tsbl %>% slice(sample(nrow(tsbl)))
+#> Warning: Current temporal ordering may yield unexpected results.
+#> ℹ Suggest to sort by ``, `year` first.
+
+wrong <- mutate(scrambled, diff = difference(value))
+#> Warning: Current temporal ordering may yield unexpected results.
+#> ℹ Suggest to sort by ``, `year` first.
+arrange(wrong, year)
+#> # A tsibble: 6 x 3 [1Y]
+#>    year value  diff
+#>   <int> <dbl> <dbl>
+#> 1  2000     0    NA
+#> 2  2001     1   -24
+#> 3  2002     4     4
+#> 4  2003     9     5
+#> 5  2004    16    15
+#> 6  2005    25    16
+
+right <- mutate(scrambled, diff = difference(value, order_by = year))
+#> Warning: Current temporal ordering may yield unexpected results.
+#> ℹ Suggest to sort by ``, `year` first.
+arrange(right, year)
+#> # A tsibble: 6 x 3 [1Y]
+#>    year value  diff
+#>   <int> <dbl> <dbl>
+#> 1  2000     0    NA
+#> 2  2001     1     1
+#> 3  2002     4     3
+#> 4  2003     9     5
+#> 5  2004    16     7
+#> 6  2005    25     9
+```
+
+`cal_time_wise` function assigns the index variable in a tsibble to
+“order\_by” argument of `difference` function. As a result, `tq_diff`
+function returns right even if the rows are reshuffled.
+
+``` r
+tsbl %>% 
+  tq_diff()
+#> # A tsibble: 6 x 2 [1Y]
+#>    year value
+#>   <int> <dbl>
+#> 1  2000    NA
+#> 2  2001     1
+#> 3  2002     3
+#> 4  2003     5
+#> 5  2004     7
+#> 6  2005     9
+
+scrambled %>% 
+  tq_diff() %>% 
+  arrange(year)
+#> Warning: Current temporal ordering may yield unexpected results.
+#> ℹ Suggest to sort by ``, `year` first.
+#> # A tsibble: 6 x 2 [1Y]
+#>    year value
+#>   <int> <dbl>
+#> 1  2000    NA
+#> 2  2001     1
+#> 3  2002     3
+#> 4  2003     5
+#> 5  2004     7
+#> 6  2005     9
+```
+
+## moving\_average and tq\_ma: calculate moving averages
+
+`moving_average` function calculates moving averages using `slider`
+package. “n” specifies the window width. “order\_by” is optional, and
+works in the same way as in `difference` function. For other arguments,
+refer to its document.
+
+``` r
+aus_livestock %>% 
+  group_by_key() %>% 
+  mutate(ma3 = moving_average(Count, n = 3)) %>% 
+  ungroup()
+#> # A tsibble: 29,364 x 5 [1M]
+#> # Key:       Animal, State [54]
+#>       Month Animal                     State                        Count   ma3
+#>       <mth> <fct>                      <fct>                        <dbl> <dbl>
+#>  1 1976 Jul Bulls, bullocks and steers Australian Capital Territory  2300   NA 
+#>  2 1976 Aug Bulls, bullocks and steers Australian Capital Territory  2100   NA 
+#>  3 1976 Sep Bulls, bullocks and steers Australian Capital Territory  2100 2167.
+#>  4 1976 Oct Bulls, bullocks and steers Australian Capital Territory  1900 2033.
+#>  5 1976 Nov Bulls, bullocks and steers Australian Capital Territory  2100 2033.
+#>  6 1976 Dec Bulls, bullocks and steers Australian Capital Territory  1800 1933.
+#>  7 1977 Jan Bulls, bullocks and steers Australian Capital Territory  1800 1900 
+#>  8 1977 Feb Bulls, bullocks and steers Australian Capital Territory  1900 1833.
+#>  9 1977 Mar Bulls, bullocks and steers Australian Capital Territory  2700 2133.
+#> 10 1977 Apr Bulls, bullocks and steers Australian Capital Territory  2300 2300 
+#> # … with 29,354 more rows
+```
+
+`tq_ma` function transforms “Count” variable. For arguments other than
+the first one, a tsibble, look at `moving_average` document.
+
+``` r
+aus_livestock %>% 
+  tq_ma(n = 3)
+#> # A tsibble: 29,364 x 4 [1M]
+#> # Key:       Animal, State [54]
+#>       Month Animal                     State                        Count
+#>       <mth> <fct>                      <fct>                        <dbl>
+#>  1 1976 Jul Bulls, bullocks and steers Australian Capital Territory   NA 
+#>  2 1976 Aug Bulls, bullocks and steers Australian Capital Territory   NA 
+#>  3 1976 Sep Bulls, bullocks and steers Australian Capital Territory 2167.
+#>  4 1976 Oct Bulls, bullocks and steers Australian Capital Territory 2033.
+#>  5 1976 Nov Bulls, bullocks and steers Australian Capital Territory 2033.
+#>  6 1976 Dec Bulls, bullocks and steers Australian Capital Territory 1933.
+#>  7 1977 Jan Bulls, bullocks and steers Australian Capital Territory 1900 
+#>  8 1977 Feb Bulls, bullocks and steers Australian Capital Territory 1833.
+#>  9 1977 Mar Bulls, bullocks and steers Australian Capital Territory 2133.
+#> 10 1977 Apr Bulls, bullocks and steers Australian Capital Territory 2300 
+#> # … with 29,354 more rows
+```
+
+## growth\_rate and tq\_gr: calculate growth rates
+
+`growth_rate` function calculates growth rates. “n” specifies the lag.
+“order\_by” is optional, and works in the same way as in `difference`
+function. For other arguments, refer to its document.
+
+``` r
+aus_arrivals %>% 
+  group_by_key() %>% 
+  mutate(
+    gr_yoy = growth_rate(Arrivals, n = 4),
+    gr_annualized = growth_rate(Arrivals, n = 1, annualize = 4),
+    gr_yoy_not_pct = growth_rate(Arrivals, n = 4, pct = FALSE)
+    )
+#> # A tsibble: 508 x 6 [1Q]
+#> # Key:       Origin [4]
+#> # Groups:    Origin [4]
+#>    Quarter Origin Arrivals gr_yoy gr_annualized gr_yoy_not_pct
+#>      <qtr> <chr>     <int>  <dbl>         <dbl>          <dbl>
+#>  1 1981 Q1 Japan     14763  NA            NA           NA     
+#>  2 1981 Q2 Japan      9321  NA           -84.1         NA     
+#>  3 1981 Q3 Japan     10166  NA            41.5         NA     
+#>  4 1981 Q4 Japan     19509  NA          1256.          NA     
+#>  5 1982 Q1 Japan     17117  15.9         -40.7          0.159 
+#>  6 1982 Q2 Japan     10617  13.9         -85.2          0.139 
+#>  7 1982 Q3 Japan     11737  15.5          49.4          0.155 
+#>  8 1982 Q4 Japan     20961   7.44        917.           0.0744
+#>  9 1983 Q1 Japan     20671  20.8          -5.42         0.208 
+#> 10 1983 Q2 Japan     12235  15.2         -87.7          0.152 
+#> # … with 498 more rows
+```
+
+`tq_gr` function transforms “Arrivals” variable in this example. For
+arguments other than the first one, a tsibble, look at `growth_rate`
+document.
+
+``` r
+aus_arrivals %>% 
+  tq_gr(n = 4)
+#> # A tsibble: 508 x 3 [1Q]
+#> # Key:       Origin [4]
+#>    Quarter Origin Arrivals
+#>      <qtr> <chr>     <dbl>
+#>  1 1981 Q1 Japan     NA   
+#>  2 1981 Q2 Japan     NA   
+#>  3 1981 Q3 Japan     NA   
+#>  4 1981 Q4 Japan     NA   
+#>  5 1982 Q1 Japan     15.9 
+#>  6 1982 Q2 Japan     13.9 
+#>  7 1982 Q3 Japan     15.5 
+#>  8 1982 Q4 Japan      7.44
+#>  9 1983 Q1 Japan     20.8 
+#> 10 1983 Q2 Japan     15.2 
+#> # … with 498 more rows
+```
+
+## season\_adjust and tq\_sa: calculate seasonally adjusted values
+
+`season_adjust` function calculates seasonally adjusted values using
+`season` package. It requires not just “x” argument, a numeric vector,
+but also “order\_by” argument, a time vector. For other arguments, refer
+to `season` document.
+
+``` r
+aus_arrivals %>% 
+  group_by_key() %>% 
+  mutate(sa = season_adjust(Arrivals, Quarter)) %>% 
+  ungroup()
+#> # A tsibble: 508 x 4 [1Q]
+#> # Key:       Origin [4]
+#>    Quarter Origin Arrivals     sa
+#>      <qtr> <chr>     <int>  <dbl>
+#>  1 1981 Q1 Japan     14763 12179.
+#>  2 1981 Q2 Japan      9321 12742.
+#>  3 1981 Q3 Japan     10166 13107.
+#>  4 1981 Q4 Japan     19509 14065.
+#>  5 1982 Q1 Japan     17117 14004.
+#>  6 1982 Q2 Japan     10617 14564.
+#>  7 1982 Q3 Japan     11737 14909.
+#>  8 1982 Q4 Japan     20961 15542.
+#>  9 1983 Q1 Japan     20671 16868.
+#> 10 1983 Q2 Japan     12235 16584.
+#> # … with 498 more rows
+```
+
+`tq_sa` function transforms “Arrivals” variable in this example.
+
+``` r
+aus_arrivals %>% 
+  tq_sa()
+#> # A tsibble: 508 x 3 [1Q]
+#> # Key:       Origin [4]
+#>    Quarter Origin Arrivals
+#>      <qtr> <chr>     <dbl>
+#>  1 1981 Q1 Japan    12179.
+#>  2 1981 Q2 Japan    12742.
+#>  3 1981 Q3 Japan    13107.
+#>  4 1981 Q4 Japan    14065.
+#>  5 1982 Q1 Japan    14004.
+#>  6 1982 Q2 Japan    14564.
+#>  7 1982 Q3 Japan    14909.
+#>  8 1982 Q4 Japan    15542.
+#>  9 1983 Q1 Japan    16868.
+#> 10 1983 Q2 Japan    16584.
+#> # … with 498 more rows
 ```
 
 EOL
