@@ -27,8 +27,11 @@
 #' @export
 growth_rate <- function(x, n = 12, annualize = 1, pct = TRUE,
                         order_by = NULL) {
-  if (n < 1 || annualize < 1) {
-    stop("`n` and `annualize` must be positive integers.")
+  if (n < 1) {
+    stop("`n` must be positive integers.")
+  }
+  if (annualize <= 0) {
+    stop("annualize` must be positive.")
   }
   if (is.null(order_by)) {
     gr_impl(x, n = n, annualize = annualize, pct = pct)
